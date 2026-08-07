@@ -7,3 +7,6 @@ Pillow
 scikit-learn
 tqdm
 matplotlib
+jiwer
+seaborn
+reportlab

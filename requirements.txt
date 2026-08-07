@@ -10,3 +10,6 @@ matplotlib
 jiwer
 seaborn
 reportlab
+pytest
+pytest-cov
+

@@ -1,0 +1,51 @@
+========================================
+  AUTOMATED TEST REPORT & BUG SUMMARY   
+  Date: 2026-08-07 21:52:15 
+========================================
+
+--- PYTEST OUTPUT ---
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Dell\AppData\Local\Programs\Python\Python310\python.exe
+cachedir: .pytest_cache
+rootdir: E:\MLDRLG\Handwritten-Text-Recognition-Deep-Learning
+plugins: cov-7.1.0
+collecting ... collected 6 items
+
+tests/test_api.py::test_root_endpoint PASSED                             [ 16%]
+tests/test_api.py::test_api_docs_endpoint PASSED                         [ 33%]
+tests/test_api.py::test_health_endpoint PASSED                           [ 50%]
+tests/test_api.py::test_empty_upload PASSED                              [ 66%]
+tests/test_api.py::test_invalid_image_type PASSED                        [ 83%]
+tests/test_api.py::test_corrupted_image PASSED                           [100%]
+
+============================== warnings summary ===============================
+C:\Users\Dell\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:255
+  C:\Users\Dell\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:255: FutureWarning: You are using a Python version (3.10.11) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+    warnings.warn(message, FutureWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============================== tests coverage ================================
+______________ coverage: platform win32, python 3.10.11-final-0 _______________
+
+Name                        Stmts   Miss  Cover
+-----------------------------------------------
+app.py                        102     30    71%
+src\__init__.py                 0      0   100%
+src\cnn_extractor.py           45      2    96%
+src\dataset_integrator.py      72     72     0%
+src\dataset_splitter.py        84     84     0%
+src\dataset_validator.py       27     27     0%
+src\evaluator.py              161    161     0%
+src\model.py                   76     19    75%
+src\predictor.py               89     35    61%
+src\preprocessor.py            85     57    33%
+src\rnn_module.py              30      2    93%
+src\trainer.py                 94     94     0%
+-----------------------------------------------
+TOTAL                         865    583    33%
+Coverage HTML written to dir test_reports/coverage_html
+=================== 6 passed, 1 warning in 60.72s (0:01:00) ===================
+
+========================================
+STATUS: PASSED - All tests executed successfully.
+BUGS FOUND: 0

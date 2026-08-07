@@ -145,6 +145,14 @@ def predict():
         return jsonify({"error": "Invalid file type. Allowed: jpg, jpeg, png"}), 415
 
 
+# Security Headers
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
+
 # Global Error Handlers
 @app.errorhandler(413)
 def request_entity_too_large(error):
@@ -160,6 +168,18 @@ def method_not_allowed(error):
     return jsonify({"error": "HTTP Method not allowed on this endpoint."}), 405
 
 if __name__ == '__main__':
-    logger.info("Starting Handwritten Text Recognition Flask API Server...")
-    # debug=False in production. Host 0.0.0.0 exposes it to the network.
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # Determine environment
+    env = os.environ.get('FLASK_ENV', 'production')
+    
+    if env == 'development':
+        logger.info("Starting Handwritten Text Recognition API in DEVELOPMENT mode...")
+        app.run(host='0.0.0.0', port=5000, debug=True)
+    else:
+        logger.info("Starting Handwritten Text Recognition API in PRODUCTION mode (Waitress)...")
+        try:
+            from waitress import serve
+            # Waitress is a production WSGI server for Windows/Linux
+            serve(app, host='0.0.0.0', port=5000, threads=4)
+        except ImportError:
+            logger.warning("Waitress not installed. Falling back to Flask dev server. Run 'pip install waitress'.")
+            app.run(host='0.0.0.0', port=5000, debug=False)

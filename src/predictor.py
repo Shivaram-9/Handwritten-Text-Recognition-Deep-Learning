@@ -24,6 +24,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+import functools
+import tensorflow as tf
+
 class HTRPredictor:
     """
     Production-ready Inference Pipeline for Handwritten Text Recognition.
@@ -51,6 +54,7 @@ class HTRPredictor:
             self.char_map = char_map
             
         self.inference_model = self._load_model()
+        self._predict_fn = self._build_predict_fn()
         
     def _load_model(self):
         """Loads the HTR inference model and its pre-trained weights."""
@@ -68,8 +72,6 @@ class HTRPredictor:
             
         logger.info(f"Loading trained weights from {self.model_path}...")
         try:
-            # Load weights into the full training model (which shares references with inference_model)
-            # We use by_name=True and skip_mismatch=True to be robust against CTC layer quirks
             training_model.load_weights(self.model_path, by_name=True, skip_mismatch=True)
             logger.info("Weights loaded successfully.")
         except Exception as e:
@@ -78,9 +80,31 @@ class HTRPredictor:
             
         return inference_model
         
+    def _build_predict_fn(self):
+        """Builds an optimized prediction function using XLA if enabled."""
+        if getattr(Config, 'ENABLE_XLA', False):
+            logger.info("Enabling XLA Compilation for faster inference...")
+            return tf.function(self.inference_model, jit_compile=True)
+        return self.inference_model
+
     def predict_image(self, image_path):
         """
         Runs the complete prediction pipeline on a single image file.
+        Wraps the internal logic to allow for optional caching.
+        """
+        if getattr(Config, 'ENABLE_CACHING', False):
+            return self._predict_image_cached(image_path)
+        return self._predict_image_uncached(image_path)
+
+    @functools.lru_cache(maxsize=128)
+    def _predict_image_cached(self, image_path):
+        """Cached version of the prediction pipeline (safe for repeated evaluations)."""
+        logger.debug(f"Cache miss for {image_path}. Running inference.")
+        return self._predict_image_uncached(image_path)
+
+    def _predict_image_uncached(self, image_path):
+        """
+        Core inference logic on a single image file.
         
         :param image_path: Path to the image file (JPG, PNG, JPEG).
         :return: Tuple of (predicted_text, confidence_score) or (None, 0.0) on failure.
@@ -105,16 +129,16 @@ class HTRPredictor:
             return None, 0.0
             
         # 2. Format Data for Neural Network (Batch, H, W, Channels)
-        # Preprocessor returned 0-255 uint8 to allow saving. We must normalize to 0.0-1.0 for the network.
         normalized_img = processed_img / 255.0
-        
-        # Add channel dimension if missing, and then batch dimension
         img_batch = np.expand_dims(normalized_img, axis=-1)
         img_batch = np.expand_dims(img_batch, axis=0)
         
+        # Convert to Tensor for XLA compatibility
+        input_tensor = tf.convert_to_tensor(img_batch, dtype=tf.float32)
+        
         # 3. Predict Softmax Distributions
         try:
-            preds = self.inference_model.predict(img_batch, verbose=0)
+            preds = self._predict_fn(input_tensor)
             
             # 4. Decode CTC Predictions using modular decoder
             results, confidences = HTRModel.decode_predictions(preds, self.char_map)

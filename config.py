@@ -1,5 +1,8 @@
 import os
 
+# Suppress verbose TensorFlow C++ logs (0 = all, 1 = no INFO, 2 = no INFO/WARNING)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 class Config:
     """Base configuration class."""
     # Basic Config
@@ -21,3 +24,7 @@ class Config:
     # Flask App Config
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max upload size
+    
+    # Production Optimizations
+    ENABLE_XLA = os.environ.get('ENABLE_XLA', 'True').lower() == 'true'
+    ENABLE_CACHING = os.environ.get('ENABLE_CACHING', 'True').lower() == 'true'

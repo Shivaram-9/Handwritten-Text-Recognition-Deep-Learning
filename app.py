@@ -171,15 +171,18 @@ if __name__ == '__main__':
     # Determine environment
     env = os.environ.get('FLASK_ENV', 'production')
     
+    port = getattr(Config, 'PORT', 5000)
+    host = getattr(Config, 'HOST', '0.0.0.0')
+    
     if env == 'development':
-        logger.info("Starting Handwritten Text Recognition API in DEVELOPMENT mode...")
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        logger.info(f"Starting Handwritten Text Recognition API in DEVELOPMENT mode on {host}:{port}...")
+        app.run(host=host, port=port, debug=True)
     else:
-        logger.info("Starting Handwritten Text Recognition API in PRODUCTION mode (Waitress)...")
+        logger.info(f"Starting Handwritten Text Recognition API in PRODUCTION mode (Waitress) on {host}:{port}...")
         try:
             from waitress import serve
             # Waitress is a production WSGI server for Windows/Linux
-            serve(app, host='0.0.0.0', port=5000, threads=4)
+            serve(app, host=host, port=port, threads=4)
         except ImportError:
             logger.warning("Waitress not installed. Falling back to Flask dev server. Run 'pip install waitress'.")
-            app.run(host='0.0.0.0', port=5000, debug=False)
+            app.run(host=host, port=port, debug=False)

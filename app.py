@@ -167,22 +167,7 @@ def not_found(error):
 def method_not_allowed(error):
     return jsonify({"error": "HTTP Method not allowed on this endpoint."}), 405
 
-if __name__ == '__main__':
-    # Determine environment
-    env = os.environ.get('FLASK_ENV', 'production')
-    
-    port = getattr(Config, 'PORT', 5000)
-    host = getattr(Config, 'HOST', '0.0.0.0')
-    
-    if env == 'development':
-        logger.info(f"Starting Handwritten Text Recognition API in DEVELOPMENT mode on {host}:{port}...")
-        app.run(host=host, port=port, debug=True)
-    else:
-        logger.info(f"Starting Handwritten Text Recognition API in PRODUCTION mode (Waitress) on {host}:{port}...")
-        try:
-            from waitress import serve
-            # Waitress is a production WSGI server for Windows/Linux
-            serve(app, host=host, port=port, threads=4)
-        except ImportError:
-            logger.warning("Waitress not installed. Falling back to Flask dev server. Run 'pip install waitress'.")
-            app.run(host=host, port=port, debug=False)
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

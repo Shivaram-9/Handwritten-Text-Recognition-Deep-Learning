@@ -15,6 +15,8 @@ class Config:
     IMAGE_HEIGHT = 32
     BATCH_SIZE = 64
     EPOCHS = 50
+    MAX_TEXT_LENGTH = 32
+    VOCAB_SIZE = 80  # English chars + numbers + punctuation + CTC blank token
     
     # Flask App Config
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')

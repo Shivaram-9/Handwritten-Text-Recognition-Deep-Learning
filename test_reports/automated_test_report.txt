@@ -1,6 +1,6 @@
 ========================================
   AUTOMATED TEST REPORT & BUG SUMMARY   
-  Date: 2026-08-07 21:52:15 
+  Date: 2026-08-07 21:55:25 
 ========================================
 
 --- PYTEST OUTPUT ---
@@ -44,7 +44,7 @@ src\trainer.py                 94     94     0%
 -----------------------------------------------
 TOTAL                         865    583    33%
 Coverage HTML written to dir test_reports/coverage_html
-=================== 6 passed, 1 warning in 60.72s (0:01:00) ===================
+======================== 6 passed, 1 warning in 13.06s ========================
 
 ========================================
 STATUS: PASSED - All tests executed successfully.

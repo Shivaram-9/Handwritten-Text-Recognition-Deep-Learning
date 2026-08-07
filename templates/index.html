@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwritten Text Recognition API</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="theme-toggle">
+        <button id="themeToggleBtn" aria-label="Toggle Dark/Light Mode">
+            <i data-lucide="sun" id="themeIcon"></i>
+        </button>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <i data-lucide="pen-tool" class="logo-icon"></i>
+            </div>
+            <h1>NeuralText Recognizer</h1>
+            <p>Upload a handwritten image and let our Deep Learning model transcribe it instantly.</p>
+        </header>
+
+        <main>
+            <div class="glass-panel upload-section" id="dropZone">
+                <form id="uploadForm">
+                    <input type="file" id="fileInput" name="file" accept=".jpg, .jpeg, .png" hidden>
+                    <div class="upload-content">
+                        <i data-lucide="upload-cloud" class="upload-icon"></i>
+                        <h3>Drag & Drop your image here</h3>
+                        <p>or</p>
+                        <button type="button" class="btn primary-btn" id="browseBtn">Browse Files</button>
+                        <span class="file-hint">Supports: JPG, JPEG, PNG</span>
+                    </div>
+                </form>
+                <div class="preview-container hidden" id="previewContainer">
+                    <img id="imagePreview" src="" alt="Image Preview">
+                    <button class="btn icon-btn remove-btn" id="removeBtn" aria-label="Remove Image">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button class="btn action-btn disabled" id="recognizeBtn" disabled>
+                    <i data-lucide="cpu"></i> Recognize Text
+                </button>
+            </div>
+
+            <div class="loading-state hidden" id="loadingState">
+                <div class="spinner"></div>
+                <p>Analyzing strokes via CNN-BiLSTM...</p>
+            </div>
+
+            <div class="result-section glass-panel hidden" id="resultSection">
+                <div class="result-header">
+                    <h2>Transcription Result</h2>
+                    <div class="confidence-badge" id="confidenceBadge">
+                        <i data-lucide="check-circle"></i> 
+                        <span id="confidenceScore">99.9%</span>
+                    </div>
+                </div>
+                
+                <div class="text-card">
+                    <p id="recognizedText">Hello World</p>
+                </div>
+                
+                <div class="result-actions">
+                    <button class="btn secondary-btn" id="copyBtn">
+                        <i data-lucide="copy"></i> Copy Text
+                    </button>
+                    <button class="btn secondary-btn" id="downloadBtn">
+                        <i data-lucide="download"></i> Download .txt
+                    </button>
+                </div>
+            </div>
+            
+            <div class="error-message hidden" id="errorMessage">
+                <i data-lucide="alert-triangle"></i>
+                <span id="errorText">An error occurred.</span>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2026 Handwritten Text Recognition Engine. Powered by Deep Learning.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

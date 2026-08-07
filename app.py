@@ -2,7 +2,7 @@ import os
 import uuid
 import logging
 import traceback
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from src.predictor import HTRPredictor
 from config import Config
 
@@ -21,7 +21,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger("HTR_Flask_API")
 
-app = Flask(__name__)
+# Use correct paths for Flask static and templates
+app = Flask(__name__, 
+            static_folder=os.path.join(Config.BASE_DIR, 'static'),
+            template_folder=os.path.join(Config.BASE_DIR, 'templates'))
+
 app.config['UPLOAD_FOLDER'] = Config.UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
 
@@ -47,18 +51,25 @@ def allowed_file(filename):
 @app.route('/', methods=['GET'])
 def index():
     """
-    Root Endpoint - API Documentation
+    Root Endpoint - Serves the Web Frontend
     """
-    api_docs = {
+    return render_template('index.html')
+
+@app.route('/api/docs', methods=['GET'])
+def api_docs():
+    """
+    API Documentation Endpoint
+    """
+    docs = {
         "api_name": "Handwritten Text Recognition API",
         "version": "1.0",
         "endpoints": {
-            "GET /": "Displays API documentation.",
+            "GET /api/docs": "Displays API documentation.",
             "POST /predict": "Accepts an image file via multipart/form-data with key 'file'. Returns transcribed text and confidence.",
             "POST /health": "Returns API and ML model health status."
         }
     }
-    return jsonify(api_docs), 200
+    return jsonify(docs), 200
 
 @app.route('/health', methods=['GET', 'POST'])
 def health_check():

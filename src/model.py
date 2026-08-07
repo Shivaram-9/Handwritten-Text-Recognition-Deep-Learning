@@ -136,24 +136,32 @@ class HTRModel:
         
         :param predictions: Raw softmax predictions from the inference model.
         :param char_map: Dictionary mapping integer indexes back to characters.
+        :return: Tuple of (results_list, confidences_list)
         """
         input_len = np.ones(predictions.shape[0]) * predictions.shape[1]
         
         # Use Keras backend CTC decode
-        decoded, _ = K.ctc_decode(predictions, input_length=input_len, greedy=True)
+        decoded, log_probs = K.ctc_decode(predictions, input_length=input_len, greedy=True)
         
         # Convert index sequence back to string
         results = []
-        for seq in decoded[0]:
-            seq = seq.numpy()
+        confidences = []
+        
+        for i, seq in enumerate(decoded[0]):
+            seq_numpy = seq.numpy()
             res = ""
-            for x in seq:
+            for x in seq_numpy:
                 # -1 means the CTC blank token
                 if x != -1 and x in char_map:
                     res += char_map[x]
             results.append(res)
             
-        return results
+            # Confidence is derived from negative log probabilities
+            # Taking exponential converts negative log prob back to a probability [0, 1]
+            conf = np.exp(-log_probs[i][0].numpy())
+            confidences.append(float(conf))
+            
+        return results, confidences
 
 if __name__ == "__main__":
     logger.info("Initializing HTR Integration Test...")

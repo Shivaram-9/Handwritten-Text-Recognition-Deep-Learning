@@ -43,15 +43,11 @@ class CTCLayer(layers.Layer):
         # y_pred shape: (batch_size, time_steps, num_classes)
         # y_true shape: (batch_size, max_text_length)
         input_length = tf.cast(tf.shape(y_pred)[1], dtype="int64")
+        label_length = tf.cast(tf.shape(y_true)[1], dtype="int64")
         
-        # Dynamically calculate the actual unpadded label lengths for each sample
-        # -1 is standard CTC padding token, so we count tokens that are NOT -1
-        actual_label_lengths = tf.reduce_sum(tf.cast(tf.not_equal(y_true, -1), tf.int32), axis=-1, keepdims=True)
-        label_length = tf.cast(actual_label_lengths, dtype="int64")
-        
-        # Expand input_length to match the batch dimension
+        # Expand lengths to match the batch dimension
         input_length = input_length * tf.ones(shape=(batch_len, 1), dtype="int64")
-        # label_length already has shape (batch_len, 1) from keepdims=True
+        label_length = label_length * tf.ones(shape=(batch_len, 1), dtype="int64")
         
         # Compute the CTC loss
         loss = self.loss_fn(y_true, y_pred, input_length, label_length)

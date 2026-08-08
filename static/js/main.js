@@ -2,9 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
-    const browseBtn = document.getElementById('browseBtn');
+    const uploadContent = document.getElementById('uploadContent');
     const imagePreview = document.getElementById('imagePreview');
     const previewContainer = document.getElementById('previewContainer');
+    const replaceBtn = document.getElementById('replaceBtn');
     const removeBtn = document.getElementById('removeBtn');
     const recognizeBtn = document.getElementById('recognizeBtn');
     const loadingState = document.getElementById('loadingState');
@@ -12,19 +13,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessage = document.getElementById('errorMessage');
     const errorText = document.getElementById('errorText');
     const recognizedText = document.getElementById('recognizedText');
-    const confidenceScore = document.getElementById('confidenceScore');
+    const confidenceScoreText = document.getElementById('confidenceScoreText');
+    const confidenceProgressBar = document.getElementById('confidenceProgressBar');
     const copyBtn = document.getElementById('copyBtn');
     const downloadBtn = document.getElementById('downloadBtn');
+    const historySection = document.getElementById('historySection');
+    const historyList = document.getElementById('historyList');
+    const historyCount = document.getElementById('historyCount');
     
     // Theme Toggling
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const htmlEl = document.documentElement;
     const themeIcon = document.getElementById('themeIcon');
     
-    // Set initial icon
-    if(htmlEl.getAttribute('data-theme') === 'dark') {
-        themeIcon.setAttribute('data-lucide', 'sun');
-    } else {
+    // Check system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        htmlEl.setAttribute('data-theme', 'light');
         themeIcon.setAttribute('data-lucide', 'moon');
     }
     
@@ -37,11 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
             htmlEl.setAttribute('data-theme', 'dark');
             themeIcon.setAttribute('data-lucide', 'sun');
         }
-        lucide.createIcons(); // Re-render icon
+        lucide.createIcons();
     });
 
     // File Management State
     let currentFile = null;
+    let predictionHistory = [];
 
     // --- Drag and Drop Logic ---
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -55,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ['dragenter', 'dragover'].forEach(eventName => {
         dropZone.addEventListener(eventName, () => {
-            dropZone.classList.add('dragover');
+            if (!currentFile) dropZone.classList.add('dragover');
         }, false);
     });
 
@@ -71,16 +76,17 @@ document.addEventListener('DOMContentLoaded', () => {
         handleFiles(files);
     });
 
-    // --- Click to Browse ---
-    browseBtn.addEventListener('click', () => {
-        fileInput.click();
+    // Click to Browse (only if no file is selected to avoid conflict with preview buttons)
+    dropZone.addEventListener('click', (e) => {
+        if(!currentFile && e.target !== replaceBtn && e.target !== removeBtn) {
+            fileInput.click();
+        }
     });
 
     fileInput.addEventListener('change', function() {
         handleFiles(this.files);
     });
 
-    // --- File Handling ---
     function handleFiles(files) {
         hideError();
         resultSection.classList.add('hidden');
@@ -88,8 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (files.length === 0) return;
         
         const file = files[0];
-        
-        // Validate type
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
             showError('Invalid file type. Please upload a JPG or PNG image.');
@@ -105,117 +109,175 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsDataURL(file);
         reader.onloadend = function() {
             imagePreview.src = reader.result;
-            // Hide upload content, show preview
-            document.querySelector('.upload-content').classList.add('hidden');
+            uploadContent.classList.add('hidden');
             previewContainer.classList.remove('hidden');
-            // Enable recognize button
             recognizeBtn.disabled = false;
-            recognizeBtn.classList.remove('disabled');
         }
     }
 
-    // --- Remove File ---
+    // --- Replace / Remove File ---
+    replaceBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.click();
+    });
+
     removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent triggering browse
+        e.stopPropagation();
         resetUI();
     });
 
     function resetUI() {
         currentFile = null;
         fileInput.value = '';
-        document.querySelector('.upload-content').classList.remove('hidden');
+        uploadContent.classList.remove('hidden');
         previewContainer.classList.add('hidden');
         recognizeBtn.disabled = true;
-        recognizeBtn.classList.add('disabled');
         resultSection.classList.add('hidden');
         hideError();
     }
 
-    // --- API Call ---
+    // --- API Call & UI Status ---
     recognizeBtn.addEventListener('click', async () => {
         if (!currentFile) return;
 
-        // UI State Update
+        // UI Prep
         recognizeBtn.disabled = true;
-        recognizeBtn.classList.add('disabled');
         resultSection.classList.add('hidden');
         hideError();
         
         const statusText = document.getElementById('loadingStatusText');
         loadingState.classList.remove('hidden');
-        statusText.textContent = "Uploading Image...";
+        
+        // Ensure progress bar resets visually immediately
+        confidenceProgressBar.style.width = '0%';
 
         const formData = new FormData();
         formData.append('file', currentFile);
         
-        // Simulate real-time status progression for better UX during network latency
+        // Real-time status simulation
         const statuses = [
-            "Preprocessing...", 
-            "Running CNN...", 
-            "Running BiLSTM...", 
-            "Decoding Text..."
+            "Uploading Image...", 
+            "Preprocessing via OpenCV...", 
+            "Extracting Features (CNN)...", 
+            "Sequential Modeling (BiLSTM)...", 
+            "Decoding CTC Matrix..."
         ];
         let statusIndex = 0;
+        statusText.textContent = statuses[0];
         const statusInterval = setInterval(() => {
+            statusIndex++;
             if (statusIndex < statuses.length) {
                 statusText.textContent = statuses[statusIndex];
-                statusIndex++;
             }
-        }, 300);
+        }, 400);
 
         try {
             const response = await fetch('/predict', {
                 method: 'POST',
                 body: formData
             });
-
             const data = await response.json();
             clearInterval(statusInterval);
-            statusText.textContent = "Prediction Complete!";
 
             setTimeout(() => {
                 loadingState.classList.add('hidden');
 
                 if (response.ok) {
-                    // Success
-                    recognizedText.textContent = data.recognized_text;
-                    confidenceScore.textContent = `${data.confidence}%`;
-                    if (data.latency && data.latency.total_ms) {
-                        document.getElementById('latencyScore').textContent = `${data.latency.total_ms}ms`;
-                        
-                        // Add detailed tooltip breakdown
-                        document.getElementById('latencyBadge').title = `Prep: ${data.latency.preprocessing_ms}ms | CNN+RNN: ${data.latency.inference_ms}ms | Decode: ${data.latency.decoding_ms}ms`;
-                    }
-                    resultSection.classList.remove('hidden');
+                    statusText.textContent = "Prediction Complete!";
+                    displayResults(data);
+                    addToHistory(data.recognized_text, data.confidence);
                 } else {
-                    // API Error
-                    showError(data.error || 'Failed to recognize text. Please try again.');
+                    showError(data.error || 'Prediction failed. Please try again.');
                 }
-            }, 500);
+            }, 600); // Slight delay for UX smoothness
 
         } catch (err) {
             clearInterval(statusInterval);
             loadingState.classList.add('hidden');
-            showError('Network error. Please check your connection and try again.');
+            showError('Network error. Check connection and try again.');
         } finally {
             recognizeBtn.disabled = false;
-            recognizeBtn.classList.remove('disabled');
         }
     });
+
+    function displayResults(data) {
+        recognizedText.textContent = data.recognized_text;
+        confidenceScoreText.textContent = `${data.confidence}%`;
+        
+        // Trigger CSS width transition for the bar
+        setTimeout(() => {
+            confidenceProgressBar.style.width = `${data.confidence}%`;
+            // Change color dynamically based on confidence
+            if(data.confidence < 60) {
+                confidenceProgressBar.style.background = 'linear-gradient(90deg, #EF4444, #F87171)';
+            } else if (data.confidence < 85) {
+                confidenceProgressBar.style.background = 'linear-gradient(90deg, #F59E0B, #FBBF24)';
+            } else {
+                confidenceProgressBar.style.background = 'linear-gradient(90deg, var(--success), #34D399)';
+            }
+        }, 100);
+
+        // Metrics
+        if (data.latency) {
+            document.getElementById('metricTotal').textContent = `${data.latency.total_ms || 0} ms`;
+            document.getElementById('metricPrep').textContent = `${data.latency.preprocessing_ms || 0} ms`;
+            document.getElementById('metricInfer').textContent = `${data.latency.inference_ms || 0} ms`;
+        }
+
+        resultSection.classList.remove('hidden');
+    }
+
+    // --- History Management ---
+    function addToHistory(text, confidence) {
+        const timestamp = new Date().toLocaleTimeString();
+        predictionHistory.unshift({ text, confidence, timestamp });
+        
+        // Keep only last 5 items to prevent DOM bloat
+        if(predictionHistory.length > 5) predictionHistory.pop();
+        
+        renderHistory();
+    }
+
+    function renderHistory() {
+        if(predictionHistory.length > 0) {
+            historySection.classList.remove('hidden');
+            historyCount.textContent = `${predictionHistory.length} items`;
+            
+            historyList.innerHTML = '';
+            predictionHistory.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'history-item';
+                el.innerHTML = `
+                    <div class="history-text" title="${item.text}">${item.text}</div>
+                    <div class="history-meta">
+                        <span><i data-lucide="check-circle" style="width:14px; height:14px; vertical-align:middle; color:var(--success);"></i> ${item.confidence}%</span>
+                        <span><i data-lucide="clock" style="width:14px; height:14px; vertical-align:middle;"></i> ${item.timestamp}</span>
+                    </div>
+                `;
+                // Re-render past result on click (without image for now)
+                el.addEventListener('click', () => {
+                    recognizedText.textContent = item.text;
+                    confidenceScoreText.textContent = `${item.confidence}%`;
+                    confidenceProgressBar.style.width = `${item.confidence}%`;
+                    window.scrollTo({ top: resultSection.offsetTop - 100, behavior: 'smooth' });
+                });
+                historyList.appendChild(el);
+            });
+            lucide.createIcons();
+        }
+    }
 
     // --- Action Buttons ---
     copyBtn.addEventListener('click', () => {
         const text = recognizedText.textContent;
         navigator.clipboard.writeText(text).then(() => {
             const originalHTML = copyBtn.innerHTML;
-            copyBtn.innerHTML = '<i data-lucide="check"></i> Copied!';
+            copyBtn.innerHTML = '<i data-lucide="check"></i>';
             lucide.createIcons();
             setTimeout(() => {
                 copyBtn.innerHTML = originalHTML;
                 lucide.createIcons();
             }, 2000);
-        }).catch(err => {
-            showError('Failed to copy text.');
         });
     });
 
@@ -225,19 +287,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `HTR_Result_${Date.now()}.txt`;
+        a.download = `NeuralText_Result_${Date.now()}.txt`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
     });
 
-    // --- Error Handling ---
     function showError(msg) {
         errorText.textContent = msg;
         errorMessage.classList.remove('hidden');
     }
-
     function hideError() {
         errorMessage.classList.add('hidden');
     }

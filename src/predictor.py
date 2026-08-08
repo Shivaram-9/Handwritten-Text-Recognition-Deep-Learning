@@ -53,9 +53,9 @@ class HTRPredictor:
         else:
             self.char_map = char_map
             
+        self.inference_model_path = os.path.join(Config.MODEL_DIR, 'inference_model.h5')
         self.inference_model = self._load_model()
         self._predict_fn = self._build_predict_fn()
-        self.inference_model_path = os.path.join(Config.MODEL_DIR, 'inference_model.h5')
         
     def _load_model(self):
         """Loads the HTR inference model."""

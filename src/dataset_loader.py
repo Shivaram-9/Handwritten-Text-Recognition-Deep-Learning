@@ -53,7 +53,15 @@ class DatasetLoader:
         # tf.pad expects paddings as a tensor of shape [n, 2]
         encoded_label = tf.pad(encoded_label, paddings=[[0, pad_size]], constant_values=-1)
         
-        return img, encoded_label
+        # The Keras model expects a dictionary mapping to input layer names, and a dummy target since 
+        # the loss is calculated inside the custom CTCLayer
+        inputs = {
+            "image_input": img,
+            "label_input": tf.cast(encoded_label, tf.float32)
+        }
+        
+        # We yield the same encoded_label as a dummy target, though Keras won't use it for loss
+        return inputs, tf.cast(encoded_label, tf.float32)
 
     def load_split(self, split_json_path, is_training=False):
         """

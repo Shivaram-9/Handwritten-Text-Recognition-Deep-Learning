@@ -40,7 +40,7 @@ class HTRPredictor:
                            Defaults to 'models/best_htr_model.h5'.
         :param char_map: Dictionary mapping integer indices to characters.
         """
-        self.model_path = model_path or os.path.join(Config.MODEL_DIR, 'best_htr_model.h5')
+        self.model_path = model_path or os.path.join(Config.MODEL_DIR, 'best_htr_model.weights.h5')
         self.preprocessor = ImagePreprocessor()
         
         # Initialize default character map if none provided
@@ -55,12 +55,23 @@ class HTRPredictor:
             
         self.inference_model = self._load_model()
         self._predict_fn = self._build_predict_fn()
+        self.inference_model_path = os.path.join(Config.MODEL_DIR, 'inference_model.h5')
         
     def _load_model(self):
-        """Loads the HTR inference model and its pre-trained weights."""
+        """Loads the HTR inference model."""
         logger.info("Initializing HTR Inference Architecture...")
         
-        # Instantiate the full model and extract the inference portion
+        # 1. Try loading the optimized standalone inference model
+        if os.path.exists(self.inference_model_path):
+            logger.info(f"Loading standalone inference model from {self.inference_model_path}...")
+            try:
+                inference_model = tf.keras.models.load_model(self.inference_model_path, compile=False)
+                logger.info("Inference model loaded successfully.")
+                return inference_model
+            except Exception as e:
+                logger.warning(f"Failed to load standalone model: {e}. Falling back to weight loading.")
+        
+        # 2. Fallback: Instantiate the full model and load weights
         htr = HTRModel(vocab_size=Config.VOCAB_SIZE)
         training_model = htr.get_training_model()
         inference_model = htr.get_inference_model()

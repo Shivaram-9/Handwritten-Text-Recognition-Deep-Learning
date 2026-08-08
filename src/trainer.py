@@ -46,13 +46,15 @@ class ModelTrainer:
         self.csv_log_path = os.path.join(Config.BASE_DIR, 'logs', 'training_history.csv')
         
         # Checkpoint Paths
-        self.best_model_path = os.path.join(Config.MODEL_DIR, 'best_htr_model.h5')
-        self.latest_model_path = os.path.join(self.checkpoint_dir, 'latest_model.h5')
+        self.best_model_path = os.path.join(Config.MODEL_DIR, 'best_htr_model.weights.h5')
+        self.latest_model_path = os.path.join(self.checkpoint_dir, 'latest_model.weights.h5')
+        self.inference_model_path = os.path.join(Config.MODEL_DIR, 'inference_model.h5')
         
         os.makedirs(self.checkpoint_dir, exist_ok=True)
         os.makedirs(self.tensorboard_logs, exist_ok=True)
         
         self._setup_gpu_and_mixed_precision()
+        self.htr_instance = None # Keep reference to extract inference model later
         self.model = self._initialize_model()
 
     def _setup_gpu_and_mixed_precision(self):
@@ -76,8 +78,8 @@ class ModelTrainer:
     def _initialize_model(self):
         """Initializes the HTR model, compiles it, and restores weights if resuming."""
         logger.info("Initializing HTR Training Model...")
-        htr = HTRModel()
-        training_model = htr.get_training_model()
+        self.htr_instance = HTRModel()
+        training_model = self.htr_instance.get_training_model()
         
         # CTC Loss computation is embedded directly inside the custom CTCLayer during forward pass.
         # Keras requires a loss function to compile if targets are passed during fit().
@@ -142,6 +144,14 @@ class ModelTrainer:
             )
         ]
         return callbacks
+        
+    def save_inference_model(self):
+        """Extracts and saves the compiled inference model."""
+        logger.info("Extracting Inference Model from Training Model...")
+        # Get inference model and save it completely
+        inference_model = self.htr_instance.get_inference_model()
+        inference_model.save(self.inference_model_path)
+        logger.info(f"Inference Model successfully saved to {self.inference_model_path}")
 
     def _plot_training_graphs(self, history):
         """Generates and saves visual training graphs upon completion."""

@@ -215,7 +215,7 @@ class HTREvaluator:
                 img_full_path = os.path.join(Config.DATA_DIR, 'raw', 'IAM', 'words', img_rel_path)
             
             if os.path.exists(img_full_path):
-                pred_text, conf = self.predictor.predict_image(img_full_path)
+                pred_text, conf, _, _ = self.predictor.predict_image(img_full_path)
                 
                 # Incase the predictor fails (e.g. empty weights), it returns None
                 pred_text = pred_text if pred_text is not None else ""

@@ -108,7 +108,7 @@ class ModelTrainer:
         callbacks = [
             EarlyStopping(
                 monitor='val_loss', 
-                patience=10, 
+                patience=2, 
                 restore_best_weights=True,
                 verbose=1
             ),

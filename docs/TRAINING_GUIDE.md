@@ -13,6 +13,12 @@ Because a critical bug was identified in the CTC Loss function logic (detailed i
    python src/dataset_splitter.py
    ```
 
+## Production Training Configuration
+The current configuration is specifically optimized to avoid unnecessarily long 50-epoch waits while keeping the maximum accuracy. It now strictly enforces:
+- **Maximum Epochs**: 10
+- **EarlyStopping**: Halts if `val_loss` doesn't improve for 2 epochs, and automatically restores the best weights.
+- **Artifacts**: Saves the best weights directly to `models/best_htr_model.weights.h5` and dynamically compiles the clean graph into `models/inference_model.h5`.
+
 ## Retraining the Model
 
 Because the weights are faulty, we want to completely overwrite them rather than resuming training on bad weights.

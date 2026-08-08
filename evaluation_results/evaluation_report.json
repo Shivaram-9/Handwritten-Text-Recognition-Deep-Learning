@@ -1,8 +1,8 @@
 {
-    "Total_Samples_Evaluated": 1,
-    "Sequence_Exact_Match_Accuracy": 0.0,
-    "Character_Error_Rate_CER": 100.0,
-    "Word_Error_Rate_WER": 100.0,
-    "Character_Accuracy_F1_Proxy": 0.0,
-    "Average_Prediction_Confidence": 0.0006734320322721032
+    "Total_Samples_Evaluated": 4457,
+    "Sequence_Exact_Match_Accuracy": 3.253309400942338,
+    "Character_Error_Rate_CER": 92.94326622887286,
+    "Word_Error_Rate_WER": 96.77347075957876,
+    "Character_Accuracy_F1_Proxy": 7.056733771127142,
+    "Average_Prediction_Confidence": 17.372849609377745
 }

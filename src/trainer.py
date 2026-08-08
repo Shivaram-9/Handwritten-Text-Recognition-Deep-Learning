@@ -106,11 +106,6 @@ class ModelTrainer:
     def _get_callbacks(self):
         """Configures and returns an industry-standard list of Keras callbacks."""
         callbacks = [
-            TensorBoard(
-                log_dir=self.tensorboard_logs, 
-                histogram_freq=1,
-                update_freq='epoch'
-            ),
             EarlyStopping(
                 monitor='val_loss', 
                 patience=10, 
@@ -143,6 +138,18 @@ class ModelTrainer:
                 append=self.resume_training
             )
         ]
+        
+        try:
+            import tensorboard
+            callbacks.insert(0, TensorBoard(
+                log_dir=self.tensorboard_logs, 
+                histogram_freq=1,
+                update_freq='epoch'
+            ))
+            logger.info("TensorBoard callback initialized.")
+        except ImportError:
+            logger.warning("TensorBoard is not installed. Skipping TensorBoard callback.")
+            
         return callbacks
         
     def save_inference_model(self):
@@ -181,6 +188,7 @@ class ModelTrainer:
         :param train_dataset: tf.data.Dataset or Sequence yielding (inputs, targets)
         :param val_dataset: tf.data.Dataset or Sequence yielding (inputs, targets)
         :param epochs: Number of epochs to train for. Defaults to Config.EPOCHS.
+        :return: True if training completes (or is manually interrupted safely), False on critical error.
         """
         logger.info(f"Commencing training pipeline for {epochs} epochs...")
         callbacks = self._get_callbacks()
@@ -194,12 +202,15 @@ class ModelTrainer:
             )
             logger.info("Training cycle completed successfully.")
             self._plot_training_graphs(history)
+            return True
             
         except KeyboardInterrupt:
             logger.info("Training interrupted manually by user (KeyboardInterrupt). Latest epoch checkpoint saved.")
+            return True
         except Exception as e:
             logger.error(f"A critical error occurred during the training loop: {e}")
             logger.error(traceback.format_exc())
+            return False
 
 if __name__ == "__main__":
     logger.info("Verifying Training Pipeline structure...")

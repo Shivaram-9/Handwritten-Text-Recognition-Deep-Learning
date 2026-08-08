@@ -43,15 +43,22 @@ class HTRPredictor:
         self.model_path = model_path or os.path.join(Config.MODEL_DIR, 'best_htr_model.weights.h5')
         self.preprocessor = ImagePreprocessor()
         
-        # Initialize default character map if none provided
         if char_map is None:
-            # Assuming standard alphanumeric + punctuation dataset for IAM
-            chars = " !\"#&'()*+,-./0123456789:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-            self.char_map = {i: c for i, c in enumerate(chars)}
-            # Overwrite Config.VOCAB_SIZE dynamically to avoid shape mismatches
-            Config.VOCAB_SIZE = len(chars)
+            char_map_path = os.path.join(Config.MODEL_DIR, 'char_map.json')
+            if os.path.exists(char_map_path):
+                import json
+                with open(char_map_path, 'r', encoding='utf-8') as f:
+                    self.char_map = {int(k): v for k, v in json.load(f).items()}
+                Config.VOCAB_SIZE = len(self.char_map)
+            else:
+                # Assuming standard alphanumeric + punctuation dataset for IAM
+                chars = " !\"#&'()*+,-./0123456789:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+                vocab = ['[UNK]'] + list(chars)
+                self.char_map = {i: c for i, c in enumerate(vocab)}
+                Config.VOCAB_SIZE = len(vocab)
         else:
             self.char_map = char_map
+            Config.VOCAB_SIZE = len(char_map)
             
         self.inference_model_path = os.path.join(Config.MODEL_DIR, 'inference_model.h5')
         self.inference_model = self._load_model()
@@ -65,7 +72,11 @@ class HTRPredictor:
         if os.path.exists(self.inference_model_path):
             logger.info(f"Loading standalone inference model from {self.inference_model_path}...")
             try:
-                inference_model = tf.keras.models.load_model(self.inference_model_path, compile=False)
+                inference_model = tf.keras.models.load_model(
+                    self.inference_model_path, 
+                    compile=False,
+                    safe_mode=False # Required because we have a custom squeeze Lambda layer
+                )
                 logger.info("Inference model loaded successfully.")
                 return inference_model
             except Exception as e:
@@ -83,7 +94,7 @@ class HTRPredictor:
             
         logger.info(f"Loading trained weights from {self.model_path}...")
         try:
-            training_model.load_weights(self.model_path, by_name=True, skip_mismatch=True)
+            training_model.load_weights(self.model_path)
             logger.info("Weights loaded successfully.")
         except Exception as e:
             logger.error(f"Error loading model weights: {e}")

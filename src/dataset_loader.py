@@ -107,8 +107,9 @@ class DatasetLoader:
         """
         Exports the character map to JSON for inference.
         """
-        # Create a char_map exactly like Predictor expects
-        char_map = {i: c for i, c in enumerate(self.chars)}
+        vocab = self.char_to_num.get_vocabulary()
+        # Create a char_map exactly matching StringLookup output (including [UNK] at index 0)
+        char_map = {i: c for i, c in enumerate(vocab)}
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(char_map, f, indent=4)
         logger.info(f"Vocabulary exported to {output_path}")

@@ -48,8 +48,12 @@ def main():
     # 5. Train Model
     logger.info("Starting Training...")
     # Running 1 epoch for dry-run if configured, otherwise Config.EPOCHS
-    trainer.train(train_dataset, val_dataset, epochs=Config.EPOCHS)
+    success = trainer.train(train_dataset, val_dataset, epochs=Config.EPOCHS)
     
+    if not success:
+        logger.error("Training aborted due to a critical error. Skipping model export and evaluation.")
+        return
+        
     # 6. Save Inference Model
     logger.info("Saving Standalone Inference Model...")
     trainer.save_inference_model()

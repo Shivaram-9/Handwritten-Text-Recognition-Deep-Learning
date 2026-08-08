@@ -223,6 +223,40 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('metricPrep').textContent = `${data.latency.preprocessing_ms || 0} ms`;
             document.getElementById('metricInfer').textContent = `${data.latency.inference_ms || 0} ms`;
         }
+        
+        // Pipeline Visualizer
+        const visOriginal = document.getElementById('visOriginal');
+        const visPreprocessed = document.getElementById('visPreprocessed');
+        const visLines = document.getElementById('visLines');
+        
+        if (data.pipeline_images) {
+            document.getElementById('pipelineVisualizer').classList.remove('hidden');
+            
+            if (data.pipeline_images.original) {
+                visOriginal.src = `data:image/jpeg;base64,${data.pipeline_images.original}`;
+                visOriginal.classList.remove('hidden');
+            }
+            if (data.pipeline_images.preprocessed) {
+                visPreprocessed.src = `data:image/jpeg;base64,${data.pipeline_images.preprocessed}`;
+                visPreprocessed.classList.remove('hidden');
+            }
+            
+            visLines.innerHTML = '';
+            if (data.pipeline_images.lines && data.pipeline_images.lines.length > 0) {
+                data.pipeline_images.lines.forEach((line_b64, idx) => {
+                    const img = document.createElement('img');
+                    img.src = `data:image/jpeg;base64,${line_b64}`;
+                    img.style.width = '100%';
+                    img.style.border = '1px solid var(--border-glass)';
+                    img.style.borderRadius = '4px';
+                    visLines.appendChild(img);
+                });
+            } else {
+                visLines.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem;">No multi-lines extracted (Fallback used).</span>';
+            }
+        } else {
+            document.getElementById('pipelineVisualizer').classList.add('hidden');
+        }
 
         resultSection.classList.remove('hidden');
     }

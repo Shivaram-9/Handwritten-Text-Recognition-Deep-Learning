@@ -105,65 +105,111 @@ class HTRPredictor:
     def _predict_image_uncached(self, image_path):
         """
         Core inference logic on a single image file.
+        Attempts advanced document segmentation. Falls back to single image processing.
         
         :param image_path: Path to the image file (JPG, PNG, JPEG).
-        :return: Tuple of (predicted_text, confidence_score, timings) or (None, 0.0, None) on failure.
+        :return: Tuple of (predicted_text, confidence_score, timings, pipeline_images) 
+                 or (None, 0.0, None, None) on failure.
         """
         import time
         logger.info(f"Processing inference request for: {image_path}")
         
         timings = {}
+        pipeline_images = None
         
-        # Validate File Type and Existence
         valid_extensions = ('.jpg', '.jpeg', '.png')
         if not str(image_path).lower().endswith(valid_extensions):
             logger.error(f"Unsupported file format. Please provide one of {valid_extensions}")
-            return None, 0.0, None
+            return None, 0.0, None, None
             
         if not os.path.exists(image_path):
             logger.error(f"Image not found at path: {image_path}")
-            return None, 0.0, None
+            return None, 0.0, None, None
             
-        # 1. Preprocess using existing modular preprocessor
+        # 1. Attempt Advanced Document Segmentation
         t0 = time.perf_counter()
-        processed_img, success = self.preprocessor.preprocess_image(image_path)
-        t1 = time.perf_counter()
-        timings['preprocessing_ms'] = round((t1 - t0) * 1000, 2)
+        is_doc, segmented_lines, b64_orig, b64_prep, b64_lines = self.preprocessor.segment_document(image_path)
         
-        if not success or processed_img is None:
-            logger.error(f"Failed to preprocess image: {image_path}. Image may be corrupted.")
-            return None, 0.0, None
+        if is_doc and segmented_lines and len(segmented_lines) > 0:
+            t1 = time.perf_counter()
+            timings['preprocessing_ms'] = round((t1 - t0) * 1000, 2)
             
-        # 2. Format Data for Neural Network (Batch, H, W, Channels)
-        # processed_img is already normalized to [0, 1] in float32 directly by preprocessor
-        img_batch = np.expand_dims(processed_img, axis=-1)
-        img_batch = np.expand_dims(img_batch, axis=0)
-        
-        # Convert to Tensor for XLA compatibility
-        input_tensor = tf.convert_to_tensor(img_batch, dtype=tf.float32)
-        
-        # 3. Predict Softmax Distributions
-        try:
-            t2 = time.perf_counter()
-            preds = self._predict_fn(input_tensor)
-            t3 = time.perf_counter()
-            timings['inference_ms'] = round((t3 - t2) * 1000, 2)
+            pipeline_images = {
+                "original": b64_orig,
+                "preprocessed": b64_prep,
+                "lines": b64_lines
+            }
             
-            # 4. Decode CTC Predictions using modular decoder
-            t4 = time.perf_counter()
-            results, confidences = HTRModel.decode_predictions(preds, self.char_map)
-            t5 = time.perf_counter()
-            timings['decoding_ms'] = round((t5 - t4) * 1000, 2)
+            merged_text = []
+            total_conf = 0.0
+            inf_time = 0.0
+            dec_time = 0.0
             
-            predicted_text = results[0]
-            confidence_score = confidences[0]
+            for line_tensor in segmented_lines:
+                img_batch = np.expand_dims(line_tensor, axis=-1)
+                img_batch = np.expand_dims(img_batch, axis=0)
+                input_tensor = tf.convert_to_tensor(img_batch, dtype=tf.float32)
+                
+                try:
+                    t_inf_start = time.perf_counter()
+                    preds = self._predict_fn(input_tensor)
+                    t_inf_end = time.perf_counter()
+                    inf_time += (t_inf_end - t_inf_start)
+                    
+                    t_dec_start = time.perf_counter()
+                    results, confidences = HTRModel.decode_predictions(preds, self.char_map)
+                    t_dec_end = time.perf_counter()
+                    dec_time += (t_dec_end - t_dec_start)
+                    
+                    merged_text.append(results[0])
+                    total_conf += confidences[0]
+                except Exception as e:
+                    logger.error(f"Inference failed on segmented line: {e}")
+                    
+            timings['inference_ms'] = round(inf_time * 1000, 2)
+            timings['decoding_ms'] = round(dec_time * 1000, 2)
             
-            logger.info(f"Prediction: '{predicted_text}' | Confidence: {confidence_score:.4f} | Latency: {timings}")
-            return predicted_text, confidence_score, timings
+            final_text = " ".join(merged_text)
+            avg_conf = total_conf / len(segmented_lines) if len(segmented_lines) > 0 else 0.0
             
-        except Exception as e:
-            logger.error(f"Inference failed during network execution: {e}")
-            return None, 0.0, None
+            logger.info(f"Multi-line Prediction: '{final_text}' | Confidence: {avg_conf:.4f} | Latency: {timings}")
+            return final_text, avg_conf, timings, pipeline_images
+            
+        else:
+            # 2. Fallback to Single Image Preprocessing
+            logger.info("Segmentation failed or not applicable. Falling back to single image pipeline.")
+            processed_img, success = self.preprocessor.preprocess_image(image_path)
+            t1 = time.perf_counter()
+            timings['preprocessing_ms'] = round((t1 - t0) * 1000, 2)
+            
+            if not success or processed_img is None:
+                logger.error(f"Failed to preprocess image: {image_path}. Image may be corrupted.")
+                return None, 0.0, None, None
+                
+            img_batch = np.expand_dims(processed_img, axis=-1)
+            img_batch = np.expand_dims(img_batch, axis=0)
+            input_tensor = tf.convert_to_tensor(img_batch, dtype=tf.float32)
+            
+            try:
+                t2 = time.perf_counter()
+                preds = self._predict_fn(input_tensor)
+                t3 = time.perf_counter()
+                timings['inference_ms'] = round((t3 - t2) * 1000, 2)
+                
+                t4 = time.perf_counter()
+                results, confidences = HTRModel.decode_predictions(preds, self.char_map)
+                t5 = time.perf_counter()
+                timings['decoding_ms'] = round((t5 - t4) * 1000, 2)
+                
+                predicted_text = results[0]
+                confidence_score = confidences[0]
+                
+                logger.info(f"Fallback Prediction: '{predicted_text}' | Confidence: {confidence_score:.4f} | Latency: {timings}")
+                return predicted_text, confidence_score, timings, None
+                
+            except Exception as e:
+                logger.error(f"Inference failed during fallback network execution: {e}")
+                return None, 0.0, None, None
 
 if __name__ == "__main__":
     # Test script initialization

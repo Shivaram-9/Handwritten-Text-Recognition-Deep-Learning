@@ -88,9 +88,9 @@
         <!-- Result Dashboard -->
         <section class="glass-panel dashboard-grid hidden" id="resultSection">
             <!-- Left: Transcription -->
-            <div class="transcription-panel">
+            <div class="transcription-panel" style="grid-column: 1 / -1;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="font-weight: 600;">Transcription Result</h3>
+                    <h3 style="font-weight: 600;">Final Transcription</h3>
                     <div style="display: flex; gap: 0.5rem;">
                         <button class="btn btn-secondary" id="copyBtn" style="padding: 0.5rem;" title="Copy to clipboard">
                             <i data-lucide="copy"></i>
@@ -106,7 +106,7 @@
                 
                 <div style="margin-top: 1rem;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                        <span style="font-size: 0.875rem; color: var(--text-muted);">AI Confidence</span>
+                        <span style="font-size: 0.875rem; color: var(--text-muted);">Average Confidence</span>
                         <span style="font-size: 0.875rem; font-weight: 600;" id="confidenceScoreText">99.9%</span>
                     </div>
                     <div class="progress-container">
@@ -115,8 +115,28 @@
                 </div>
             </div>
 
-            <!-- Right: Performance Metrics -->
-            <div class="metrics-panel">
+            <!-- Left Bottom: Pipeline Visualizer (Base64 Maps) -->
+            <div class="metrics-panel" style="grid-column: 1 / 2;" id="pipelineVisualizer">
+                <h3 style="font-weight: 600; margin-bottom: 1rem;">Computer Vision Pipeline</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Perspective Transform</h4>
+                        <img id="visOriginal" src="" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-glass);" class="hidden">
+                    </div>
+                    <div>
+                        <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CLAHE + Thresholding</h4>
+                        <img id="visPreprocessed" src="" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-glass);" class="hidden">
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Multi-Line Segments</h4>
+                    <div id="visLines" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.5rem; background: rgba(0,0,0,0.1); border-radius: 8px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Bottom: Performance Metrics -->
+            <div class="metrics-panel" style="grid-column: 2 / -1;">
                 <h3 style="font-weight: 600; margin-bottom: 1rem;">Inference Metrics</h3>
                 
                 <div class="metric-card">

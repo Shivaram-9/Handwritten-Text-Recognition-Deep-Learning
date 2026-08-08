@@ -11,11 +11,21 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <!-- Dynamic Animated Background -->
-    <div class="bg-wrapper">
-        <div class="mesh-blob mesh-blob-1"></div>
-        <div class="mesh-blob mesh-blob-2"></div>
-    </div>
+    <!-- SVG Asset Library -->
+    <svg style="display: none;">
+        <defs>
+            <pattern id="ocr-grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="1" stroke-opacity="0.1"/>
+            </pattern>
+            <pattern id="tech-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1" fill="currentColor" fill-opacity="0.2"/>
+            </pattern>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+        </defs>
+    </svg>
 
     <!-- Sticky Navbar -->
     <nav class="navbar">
@@ -28,180 +38,211 @@
         </button>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="ai-badge">
-            <i data-lucide="zap"></i> Powered by CNN-BiLSTM v2.0
+    <!-- Section 1: Hero (Neural Atmosphere) -->
+    <div class="page-section bg-neural">
+        <div class="neural-nodes">
+            <!-- Animated neural nodes added via CSS pseudo-elements -->
+            <svg class="neural-pathways" viewBox="0 0 1000 300" preserveAspectRatio="none">
+                <path class="neural-path p1" d="M0,150 Q250,50 500,150 T1000,150" fill="none"/>
+                <path class="neural-path p2" d="M0,200 Q300,300 600,100 T1000,200" fill="none"/>
+                <circle class="node n1" cx="250" cy="100" r="4" />
+                <circle class="node n2" cx="500" cy="150" r="6" />
+                <circle class="node n3" cx="600" cy="100" r="5" />
+                <circle class="node n4" cx="750" cy="200" r="4" />
+            </svg>
         </div>
-        <h1>Instantly digitize handwriting with superhuman AI accuracy.</h1>
-        <p>Drop your notes below. Our deep learning engine preprocesses, decodes, and translates strokes into text in milliseconds.</p>
-    </section>
+        <section class="hero content-wrapper">
+            <div class="ai-badge">
+                <i data-lucide="zap"></i> Powered by CNN-BiLSTM v2.0
+            </div>
+            <h1>Instantly digitize handwriting with superhuman AI accuracy.</h1>
+            <p>Drop your notes below. Our deep learning engine preprocesses, decodes, and translates strokes into text in milliseconds.</p>
+        </section>
+    </div>
 
-    <!-- Main Workspace -->
-    <main class="main-container">
-        
-        <!-- Upload Card -->
-        <section class="glass-panel" id="uploadSection">
-            <form id="uploadForm">
-                <input type="file" id="fileInput" name="file" accept=".jpg, .jpeg, .png" hidden>
-                
-                <div class="upload-area" id="dropZone">
-                    <div class="upload-content" id="uploadContent">
-                        <i data-lucide="cloud-upload" class="upload-icon"></i>
-                        <h3>Drag & drop your handwriting here</h3>
-                        <p>or click to browse from your device</p>
-                    </div>
+    <!-- Section 2: Upload (Document / Handwriting / OCR elements) -->
+    <div class="page-section bg-doc-texture">
+        <div class="handwriting-bg">
+            <svg class="hw-stroke" viewBox="0 0 500 100" preserveAspectRatio="xMidYMid slice">
+                <path d="M10,50 Q40,10 70,50 T130,50 T190,40 T250,60 T310,40 T370,60" fill="none" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="scan-line-overlay"></div>
+        <main class="content-wrapper main-container-layout">
+            <!-- Upload Card -->
+            <section class="glass-panel relative-z" id="uploadSection">
+                <form id="uploadForm">
+                    <input type="file" id="fileInput" name="file" accept=".jpg, .jpeg, .png" hidden>
                     
-                    <div class="preview-wrapper hidden" id="previewContainer">
-                        <img id="imagePreview" class="preview-img" src="" alt="Handwriting Preview">
-                        <div class="preview-actions">
-                            <button type="button" class="btn btn-secondary" id="replaceBtn">
-                                <i data-lucide="refresh-cw"></i> Replace
+                    <div class="upload-area" id="dropZone">
+                        <div class="upload-content" id="uploadContent">
+                            <i data-lucide="cloud-upload" class="upload-icon"></i>
+                            <h3>Drag & drop your handwriting here</h3>
+                            <p>or click to browse from your device</p>
+                        </div>
+                        
+                        <div class="preview-wrapper hidden" id="previewContainer">
+                            <img id="imagePreview" class="preview-img" src="" alt="Handwriting Preview">
+                            <div class="preview-actions">
+                                <button type="button" class="btn btn-secondary" id="replaceBtn">
+                                    <i data-lucide="refresh-cw"></i> Replace
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="removeBtn" style="color: var(--error);">
+                                    <i data-lucide="trash-2"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="predict-action-container">
+                    <button type="button" class="btn btn-primary btn-large" id="recognizeBtn" disabled>
+                        <i data-lucide="cpu"></i> Run AI Model
+                    </button>
+                </div>
+            </section>
+
+            <!-- Loading Hologram -->
+            <div class="ai-loader-container hidden relative-z" id="loadingState">
+                <div class="ai-core"></div>
+                <p class="loading-text" id="loadingStatusText">Initializing GPU...</p>
+            </div>
+
+            <!-- Error Alert -->
+            <div class="error-message hidden relative-z" id="errorMessage">
+                <i data-lucide="alert-triangle"></i>
+                <span id="errorText"></span>
+            </div>
+        </main>
+    </div>
+
+    <!-- Section 3 & 4 & 5: Result (OCR Grid / Data flow) -->
+    <div class="page-section bg-ocr-grid">
+        <div class="data-particles"></div>
+        <div class="content-wrapper main-container-layout">
+            <!-- Result Dashboard -->
+            <section class="glass-panel dashboard-grid hidden relative-z" id="resultSection">
+                <!-- Left: Transcription (Section 4 style - minimal distraction) -->
+                <div class="transcription-panel" style="grid-column: 1 / -1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="font-weight: 600;">Final Transcription</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" id="copyBtn" style="padding: 0.5rem;" title="Copy to clipboard">
+                                <i data-lucide="copy"></i>
                             </button>
-                            <button type="button" class="btn btn-secondary" id="removeBtn" style="color: var(--error);">
-                                <i data-lucide="trash-2"></i> Remove
+                            <button class="btn btn-secondary" id="downloadBtn" style="padding: 0.5rem;" title="Download .txt">
+                                <i data-lucide="download"></i>
                             </button>
                         </div>
                     </div>
+                    <div class="text-result-card" id="recognizedText">
+                        Waiting for input...
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                            <span style="font-size: 0.875rem; color: var(--text-muted);">Average Confidence</span>
+                            <span style="font-size: 0.875rem; font-weight: 600;" id="confidenceScoreText">99.9%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-fill" id="confidenceProgressBar"></div>
+                        </div>
+                    </div>
                 </div>
-            </form>
-            
-            <div class="predict-action-container">
-                <button type="button" class="btn btn-primary btn-large" id="recognizeBtn" disabled>
-                    <i data-lucide="cpu"></i> Run AI Model
-                </button>
-            </div>
-        </section>
 
-        <!-- Loading Hologram -->
-        <div class="ai-loader-container hidden" id="loadingState">
-            <div class="ai-core"></div>
-            <p class="loading-text" id="loadingStatusText">Initializing GPU...</p>
+                <!-- Left Bottom: Pipeline Visualizer (Section 3 style - neural data flow) -->
+                <div class="metrics-panel pipeline-visualizer-bg" style="grid-column: 1 / 2;" id="pipelineVisualizer">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem;">Computer Vision Pipeline</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Perspective Transform</h4>
+                            <img id="visOriginal" src="" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-glass);" class="hidden">
+                        </div>
+                        <div>
+                            <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CLAHE + Thresholding</h4>
+                            <img id="visPreprocessed" src="" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-glass);" class="hidden">
+                        </div>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Multi-Line Segments</h4>
+                        <div id="visLines" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.5rem; background: rgba(0,0,0,0.1); border-radius: 8px;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Bottom: Performance Metrics (Section 5 style - waveform/tech grids) -->
+                <div class="metrics-panel tech-grid-bg" style="grid-column: 2 / -1;">
+                    <h3 style="font-weight: 600; margin-bottom: 1rem;">Inference Metrics</h3>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon"><i data-lucide="activity"></i></div>
+                        <div class="metric-data">
+                            <h4>Total Latency</h4>
+                            <p id="metricTotal">-- ms</p>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i data-lucide="image"></i></div>
+                        <div class="metric-data">
+                            <h4>Preprocessing</h4>
+                            <p id="metricPrep">-- ms</p>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;"><i data-lucide="cpu"></i></div>
+                        <div class="metric-data">
+                            <h4>CNN + BiLSTM</h4>
+                            <p id="metricInfer">-- ms</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
+    </div>
 
-        <!-- Error Alert -->
-        <div class="error-message hidden" id="errorMessage">
-            <i data-lucide="alert-triangle"></i>
-            <span id="errorText"></span>
+    <!-- Section 6: History (Archive/Document Style) -->
+    <div class="page-section bg-archive">
+        <div class="content-wrapper main-container-layout">
+            <section class="history-section hidden relative-z" id="historySection">
+                <div class="history-header">
+                    <h3 style="font-weight: 600;">Session History</h3>
+                    <span style="font-size: 0.875rem; color: var(--text-muted);" id="historyCount">0 items</span>
+                </div>
+                <div class="history-list" id="historyList">
+                    <!-- History items populated via JS -->
+                </div>
+            </section>
         </div>
+    </div>
 
-        <!-- Result Dashboard -->
-        <section class="glass-panel dashboard-grid hidden" id="resultSection">
-            <!-- Left: Transcription -->
-            <div class="transcription-panel" style="grid-column: 1 / -1;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="font-weight: 600;">Final Transcription</h3>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="btn btn-secondary" id="copyBtn" style="padding: 0.5rem;" title="Copy to clipboard">
-                            <i data-lucide="copy"></i>
-                        </button>
-                        <button class="btn btn-secondary" id="downloadBtn" style="padding: 0.5rem;" title="Download .txt">
-                            <i data-lucide="download"></i>
-                        </button>
-                    </div>
+    <!-- Section 7: Footer (Tech Environment) -->
+    <div class="page-section bg-tech-footer">
+        <footer>
+            <div class="content-wrapper footer-content">
+                <div class="footer-col">
+                    <h4>NeuralText Recognition</h4>
+                    <p>A production-ready deep learning architecture leveraging Convolutional Neural Networks and Bidirectional LSTMs for state-of-the-art Optical Character Recognition.</p>
                 </div>
-                <div class="text-result-card" id="recognizedText">
-                    Waiting for input...
+                <div class="footer-col">
+                    <h4>Core Tech Stack</h4>
+                    <p>TensorFlow XLA, Keras, OpenCV Headless, Flask, Waitress WSGI, Vanilla JS Glassmorphism.</p>
                 </div>
-                
-                <div style="margin-top: 1rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                        <span style="font-size: 0.875rem; color: var(--text-muted);">Average Confidence</span>
-                        <span style="font-size: 0.875rem; font-weight: 600;" id="confidenceScoreText">99.9%</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-fill" id="confidenceProgressBar"></div>
+                <div class="footer-col" style="text-align: center;">
+                    <h4>Open Source</h4>
+                    <div class="footer-links">
+                        <a href="#" title="GitHub Repository"><i data-lucide="github"></i></a>
+                        <a href="#" title="System Architecture"><i data-lucide="database"></i></a>
+                        <a href="#" title="API Docs"><i data-lucide="file-code"></i></a>
                     </div>
                 </div>
             </div>
-
-            <!-- Left Bottom: Pipeline Visualizer (Base64 Maps) -->
-            <div class="metrics-panel" style="grid-column: 1 / 2;" id="pipelineVisualizer">
-                <h3 style="font-weight: 600; margin-bottom: 1rem;">Computer Vision Pipeline</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Perspective Transform</h4>
-                        <img id="visOriginal" src="" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-glass);" class="hidden">
-                    </div>
-                    <div>
-                        <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CLAHE + Thresholding</h4>
-                        <img id="visPreprocessed" src="" style="width: 100%; border-radius: 8px; border: 1px solid var(--border-glass);" class="hidden">
-                    </div>
-                </div>
-                <div style="margin-top: 1rem;">
-                    <h4 style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Multi-Line Segments</h4>
-                    <div id="visLines" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.5rem; background: rgba(0,0,0,0.1); border-radius: 8px;">
-                    </div>
-                </div>
+            <div class="copyright">
+                &copy; 2026 Deep Learning HTR Engine. All rights reserved.
             </div>
-
-            <!-- Right Bottom: Performance Metrics -->
-            <div class="metrics-panel" style="grid-column: 2 / -1;">
-                <h3 style="font-weight: 600; margin-bottom: 1rem;">Inference Metrics</h3>
-                
-                <div class="metric-card">
-                    <div class="metric-icon"><i data-lucide="activity"></i></div>
-                    <div class="metric-data">
-                        <h4>Total Latency</h4>
-                        <p id="metricTotal">-- ms</p>
-                    </div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i data-lucide="image"></i></div>
-                    <div class="metric-data">
-                        <h4>Preprocessing</h4>
-                        <p id="metricPrep">-- ms</p>
-                    </div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;"><i data-lucide="cpu"></i></div>
-                    <div class="metric-data">
-                        <h4>CNN + BiLSTM</h4>
-                        <p id="metricInfer">-- ms</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Prediction History -->
-        <section class="history-section hidden" id="historySection">
-            <div class="history-header">
-                <h3 style="font-weight: 600;">Session History</h3>
-                <span style="font-size: 0.875rem; color: var(--text-muted);" id="historyCount">0 items</span>
-            </div>
-            <div class="history-list" id="historyList">
-                <!-- History items populated via JS -->
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Premium Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-col">
-                <h4>NeuralText Recognition</h4>
-                <p>A production-ready deep learning architecture leveraging Convolutional Neural Networks and Bidirectional LSTMs for state-of-the-art Optical Character Recognition.</p>
-            </div>
-            <div class="footer-col">
-                <h4>Core Tech Stack</h4>
-                <p>TensorFlow XLA, Keras, OpenCV Headless, Flask, Waitress WSGI, Vanilla JS Glassmorphism.</p>
-            </div>
-            <div class="footer-col" style="text-align: center;">
-                <h4>Open Source</h4>
-                <div class="footer-links">
-                    <a href="#" title="GitHub Repository"><i data-lucide="github"></i></a>
-                    <a href="#" title="System Architecture"><i data-lucide="database"></i></a>
-                    <a href="#" title="API Docs"><i data-lucide="file-code"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="copyright">
-            &copy; 2026 Deep Learning HTR Engine. All rights reserved.
-        </div>
-    </footer>
+        </footer>
+    </div>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>

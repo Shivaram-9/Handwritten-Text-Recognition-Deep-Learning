@@ -17,10 +17,15 @@
     --radius: 20px;
     --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     
-    /* Background Elements Light */
-    --bg-mesh-1: rgba(37, 99, 235, 0.15);
-    --bg-mesh-2: rgba(14, 165, 233, 0.1);
-    --particle-color: rgba(37, 99, 235, 0.2);
+    /* Background Elements Light - AI Lab Theme */
+    --bg-neural: #FDFDFD;
+    --bg-doc: #F8F9FA;
+    --bg-ocr: #F1F5F9;
+    --bg-archive: #E2E8F0;
+    --bg-tech: #0F172A; /* Footer gets dark tech even in light mode */
+    --ink-color: rgba(15, 23, 42, 0.1);
+    --scan-cyan: rgba(6, 182, 212, 0.2);
+    --node-primary: rgba(37, 99, 235, 0.15);
 }
 
 [data-theme="dark"] {
@@ -35,10 +40,15 @@
     --text-muted: #94A3B8;
     --shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
     
-    /* Background Elements Dark */
-    --bg-mesh-1: rgba(139, 92, 246, 0.15);
-    --bg-mesh-2: rgba(6, 182, 212, 0.1);
-    --particle-color: rgba(139, 92, 246, 0.3);
+    /* Background Elements Dark - AI Lab Theme */
+    --bg-neural: #080C17;
+    --bg-doc: #0B1220;
+    --bg-ocr: #060B14;
+    --bg-archive: #04080E;
+    --bg-tech: #030509;
+    --ink-color: rgba(139, 92, 246, 0.25);
+    --scan-cyan: rgba(6, 182, 212, 0.3);
+    --node-primary: rgba(139, 92, 246, 0.3);
 }
 
 /* =========================================
@@ -62,49 +72,159 @@ body {
 }
 
 /* =========================================
-   Dynamic Background & Particles
+   Section-Based Backgrounds (AI Lab Theme)
    ========================================= */
-.bg-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
+.page-section {
+    position: relative;
     width: 100vw;
-    height: 100vh;
-    z-index: -1;
+    margin-left: calc(-50vw + 50%);
     overflow: hidden;
+    transition: background-color 0.5s ease;
+}
+
+.content-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    position: relative;
+    z-index: 10;
+}
+
+.main-container-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.relative-z {
+    position: relative;
+    z-index: 10;
+}
+
+/* Base body adjustments */
+body {
+    overflow-x: hidden;
+}
+
+/* 1. Hero: Neural */
+.bg-neural {
+    background-color: var(--bg-neural);
+}
+.neural-nodes {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0;
     pointer-events: none;
 }
+.neural-pathways {
+    width: 100%;
+    height: 100%;
+    stroke: var(--ink-color);
+    stroke-width: 1;
+}
+.neural-path {
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .neural-path.p1 { animation: dashAnim 8s linear infinite forwards; }
+    .neural-path.p2 { animation: dashAnim 12s linear infinite reverse forwards; }
+}
+.node {
+    fill: var(--node-primary);
+    filter: url(#glow);
+}
+@media (prefers-reduced-motion: no-preference) {
+    .node.n1 { animation: pulseNode 3s ease-in-out infinite alternate; }
+    .node.n2 { animation: pulseNode 4s ease-in-out infinite alternate 1s; }
+    .node.n3 { animation: pulseNode 2.5s ease-in-out infinite alternate 0.5s; }
+    .node.n4 { animation: pulseNode 3.5s ease-in-out infinite alternate 2s; }
+}
 
-.mesh-blob {
+/* 2. Upload: Document Texture & Handwriting */
+.bg-doc-texture {
+    background-color: var(--bg-doc);
+    /* Very subtle paper noise overlay */
+    background-image: radial-gradient(var(--ink-color) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+.handwriting-bg {
     position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.8;
-    animation: float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    top: 10%;
+    left: 5%;
+    width: 40%;
+    height: 80%;
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
+}
+.hw-stroke {
+    width: 100%;
+    height: 100%;
+    stroke: var(--primary);
+    stroke-width: 2;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .hw-stroke path {
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        animation: hwDraw 5s ease-out forwards;
+    }
+}
+.scan-line-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--scan-cyan) 50%, transparent);
+    background-size: 100% 200%;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .scan-line-overlay {
+        animation: scanVertical 6s linear infinite;
+    }
 }
 
-.mesh-blob-1 {
-    top: -10%;
-    left: -10%;
-    width: 50vw;
-    height: 50vw;
-    background: radial-gradient(circle, var(--bg-mesh-1) 0%, transparent 70%);
+/* 3. Result: OCR Grid */
+.bg-ocr-grid {
+    background-color: var(--bg-ocr);
+    background-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(37,99,235,0.05)" stroke-width="1"/></svg>');
+}
+[data-theme="dark"] .bg-ocr-grid {
+    background-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(139,92,246,0.1)" stroke-width="1"/></svg>');
 }
 
-.mesh-blob-2 {
-    bottom: -20%;
-    right: -10%;
-    width: 60vw;
-    height: 60vw;
-    background: radial-gradient(circle, var(--bg-mesh-2) 0%, transparent 70%);
-    animation-delay: -5s;
-    animation-duration: 25s;
+/* 4. History: Archive */
+.bg-archive {
+    background-color: var(--bg-archive);
+    border-top: 1px dashed var(--border-glass);
 }
 
-@keyframes float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(10%, 10%) scale(1.1); }
+/* 5. Footer: Tech Environment */
+.bg-tech-footer {
+    background-color: var(--bg-tech);
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: #F8FAFC !important;
 }
+
+/* Keyframes */
+@keyframes dashAnim {
+    to { stroke-dashoffset: 0; }
+}
+@keyframes pulseNode {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1.2); opacity: 1; }
+}
+@keyframes hwDraw {
+    to { stroke-dashoffset: 0; }
+}
+@keyframes scanVertical {
+    0% { background-position: 0% -100%; }
+    100% { background-position: 0% 200%; }
+}
+
 
 /* =========================================
    Navbar
@@ -208,17 +328,8 @@ body {
 }
 
 /* =========================================
-   Main Container & Glass Panels
+   Glass Panels
    ========================================= */
-.main-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 1rem 4rem;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
 
 .glass-panel {
     background: var(--bg-glass);

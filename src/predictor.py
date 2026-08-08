@@ -107,30 +107,36 @@ class HTRPredictor:
         Core inference logic on a single image file.
         
         :param image_path: Path to the image file (JPG, PNG, JPEG).
-        :return: Tuple of (predicted_text, confidence_score) or (None, 0.0) on failure.
+        :return: Tuple of (predicted_text, confidence_score, timings) or (None, 0.0, None) on failure.
         """
+        import time
         logger.info(f"Processing inference request for: {image_path}")
+        
+        timings = {}
         
         # Validate File Type and Existence
         valid_extensions = ('.jpg', '.jpeg', '.png')
         if not str(image_path).lower().endswith(valid_extensions):
             logger.error(f"Unsupported file format. Please provide one of {valid_extensions}")
-            return None, 0.0
+            return None, 0.0, None
             
         if not os.path.exists(image_path):
             logger.error(f"Image not found at path: {image_path}")
-            return None, 0.0
+            return None, 0.0, None
             
         # 1. Preprocess using existing modular preprocessor
+        t0 = time.perf_counter()
         processed_img, success = self.preprocessor.preprocess_image(image_path)
+        t1 = time.perf_counter()
+        timings['preprocessing_ms'] = round((t1 - t0) * 1000, 2)
         
         if not success or processed_img is None:
             logger.error(f"Failed to preprocess image: {image_path}. Image may be corrupted.")
-            return None, 0.0
+            return None, 0.0, None
             
         # 2. Format Data for Neural Network (Batch, H, W, Channels)
-        normalized_img = processed_img / 255.0
-        img_batch = np.expand_dims(normalized_img, axis=-1)
+        # processed_img is already normalized to [0, 1] in float32 directly by preprocessor
+        img_batch = np.expand_dims(processed_img, axis=-1)
         img_batch = np.expand_dims(img_batch, axis=0)
         
         # Convert to Tensor for XLA compatibility
@@ -138,20 +144,26 @@ class HTRPredictor:
         
         # 3. Predict Softmax Distributions
         try:
+            t2 = time.perf_counter()
             preds = self._predict_fn(input_tensor)
+            t3 = time.perf_counter()
+            timings['inference_ms'] = round((t3 - t2) * 1000, 2)
             
             # 4. Decode CTC Predictions using modular decoder
+            t4 = time.perf_counter()
             results, confidences = HTRModel.decode_predictions(preds, self.char_map)
+            t5 = time.perf_counter()
+            timings['decoding_ms'] = round((t5 - t4) * 1000, 2)
             
             predicted_text = results[0]
             confidence_score = confidences[0]
             
-            logger.info(f"Prediction: '{predicted_text}' | Confidence: {confidence_score:.4f}")
-            return predicted_text, confidence_score
+            logger.info(f"Prediction: '{predicted_text}' | Confidence: {confidence_score:.4f} | Latency: {timings}")
+            return predicted_text, confidence_score, timings
             
         except Exception as e:
             logger.error(f"Inference failed during network execution: {e}")
-            return None, 0.0
+            return None, 0.0, None
 
 if __name__ == "__main__":
     # Test script initialization

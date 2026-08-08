@@ -54,16 +54,25 @@
             </div>
 
             <div class="loading-state hidden" id="loadingState">
-                <div class="spinner"></div>
-                <p>Analyzing strokes via CNN-BiLSTM...</p>
+                <div class="ai-loader">
+                    <div class="ai-pulse"></div>
+                    <div class="ai-core"></div>
+                </div>
+                <p id="loadingStatusText" style="margin-top: 15px; font-weight: 500; color: var(--primary-color);">Uploading Image...</p>
             </div>
 
             <div class="result-section glass-panel hidden" id="resultSection">
                 <div class="result-header">
                     <h2>Transcription Result</h2>
-                    <div class="confidence-badge" id="confidenceBadge">
-                        <i data-lucide="check-circle"></i> 
-                        <span id="confidenceScore">99.9%</span>
+                    <div class="metrics-container">
+                        <div class="latency-badge" id="latencyBadge" title="Total API Latency">
+                            <i data-lucide="zap"></i> 
+                            <span id="latencyScore">45ms</span>
+                        </div>
+                        <div class="confidence-badge" id="confidenceBadge" title="Model Confidence">
+                            <i data-lucide="check-circle"></i> 
+                            <span id="confidenceScore">99.9%</span>
+                        </div>
                     </div>
                 </div>
                 

@@ -88,6 +88,7 @@ def predict():
     """
     Inference Endpoint - Processes an uploaded image and returns the recognized text.
     """
+    import time
     if predictor is None:
         return jsonify({"error": "ML Engine not initialized or model weights missing."}), 503
         
@@ -104,6 +105,7 @@ def predict():
     if file and allowed_file(file.filename):
         filepath = None
         try:
+            api_start = time.perf_counter()
             # Generate a unique, secure filename to prevent race conditions or collisions
             ext = file.filename.rsplit('.', 1)[1].lower()
             unique_filename = f"{uuid.uuid4().hex}.{ext}"
@@ -114,7 +116,7 @@ def predict():
             logger.info(f"File saved successfully for inference: {filepath}")
             
             # Dispatch to the underlying Deep Learning predictor module
-            text, conf = predictor.predict_image(filepath)
+            text, conf, timings = predictor.predict_image(filepath)
             
             if text is None:
                 return jsonify({"error": "Failed to process image or image corrupted."}), 422
@@ -122,9 +124,13 @@ def predict():
             # Scale confidence to percentage (0-100) and round to 2 decimal places as requested
             confidence_pct = round(conf * 100, 2)
             
+            api_end = time.perf_counter()
+            timings['total_ms'] = round((api_end - api_start) * 1000, 2)
+            
             return jsonify({
                 "recognized_text": text,
-                "confidence": confidence_pct
+                "confidence": confidence_pct,
+                "latency": timings
             }), 200
             
         except Exception as e:

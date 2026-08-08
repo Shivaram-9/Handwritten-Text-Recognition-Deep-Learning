@@ -43,13 +43,10 @@ class ImagePreprocessor:
         Returns the processed image for saving and boolean indicating success.
         """
         try:
-            # 1. Load Image
-            img = cv2.imread(image_path)
-            if img is None:
+            # 1. Load Image directly as grayscale
+            gray = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            if gray is None:
                 raise ValueError("Image could not be loaded or is corrupted.")
-
-            # 2. Convert to Grayscale
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
             # 3. Remove Noise using Gaussian Blur
             blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -69,34 +66,26 @@ class ImagePreprocessor:
             target_aspect_ratio = target_w / target_h
             
             if aspect_ratio > target_aspect_ratio:
-                # Image is wider than target aspect ratio
                 new_w = target_w
                 new_h = int(new_w / aspect_ratio)
             else:
-                # Image is taller than target aspect ratio
                 new_h = target_h
                 new_w = int(new_h * aspect_ratio)
                 
-            # Prevent zero size errors during resizing
             if new_h == 0 or new_w == 0:
                 raise ValueError("Invalid dimension after aspect ratio calculation.")
                 
             resized = cv2.resize(thresh, (new_w, new_h), interpolation=cv2.INTER_AREA)
             
-            # Pad the rest with zeros (black, since we used THRESH_BINARY_INV)
-            final_img = np.zeros((target_h, target_w), dtype=np.uint8)
+            # Pad the rest with zeros
+            final_img = np.zeros((target_h, target_w), dtype=np.float32)
             
-            # Center the image
             start_x = (target_w - new_w) // 2
             start_y = (target_h - new_h) // 2
-            final_img[start_y:start_y+new_h, start_x:start_x+new_w] = resized
-
-            # 6. Normalize pixel values
-            # Pixel values are strictly mapped between 0.0 and 1.0 (Required for Deep Learning)
-            # We return the uint8 image for saving to disk, but during DataLoader execution,
-            # this variable will be used for network input.
-            normalized_img = final_img / 255.0 
             
+            # Direct normalization in the final array allocation to prevent additional copies
+            final_img[start_y:start_y+new_h, start_x:start_x+new_w] = resized.astype(np.float32) / 255.0
+
             return final_img, True
             
         except Exception as e:

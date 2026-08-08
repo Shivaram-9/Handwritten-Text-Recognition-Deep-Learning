@@ -140,10 +140,28 @@ document.addEventListener('DOMContentLoaded', () => {
         recognizeBtn.classList.add('disabled');
         resultSection.classList.add('hidden');
         hideError();
+        
+        const statusText = document.getElementById('loadingStatusText');
         loadingState.classList.remove('hidden');
+        statusText.textContent = "Uploading Image...";
 
         const formData = new FormData();
         formData.append('file', currentFile);
+        
+        // Simulate real-time status progression for better UX during network latency
+        const statuses = [
+            "Preprocessing...", 
+            "Running CNN...", 
+            "Running BiLSTM...", 
+            "Decoding Text..."
+        ];
+        let statusIndex = 0;
+        const statusInterval = setInterval(() => {
+            if (statusIndex < statuses.length) {
+                statusText.textContent = statuses[statusIndex];
+                statusIndex++;
+            }
+        }, 300);
 
         try {
             const response = await fetch('/predict', {
@@ -152,20 +170,31 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
+            clearInterval(statusInterval);
+            statusText.textContent = "Prediction Complete!";
 
-            loadingState.classList.add('hidden');
+            setTimeout(() => {
+                loadingState.classList.add('hidden');
 
-            if (response.ok) {
-                // Success
-                recognizedText.textContent = data.recognized_text;
-                confidenceScore.textContent = `${data.confidence}%`;
-                resultSection.classList.remove('hidden');
-            } else {
-                // API Error
-                showError(data.error || 'Failed to recognize text. Please try again.');
-            }
+                if (response.ok) {
+                    // Success
+                    recognizedText.textContent = data.recognized_text;
+                    confidenceScore.textContent = `${data.confidence}%`;
+                    if (data.latency && data.latency.total_ms) {
+                        document.getElementById('latencyScore').textContent = `${data.latency.total_ms}ms`;
+                        
+                        // Add detailed tooltip breakdown
+                        document.getElementById('latencyBadge').title = `Prep: ${data.latency.preprocessing_ms}ms | CNN+RNN: ${data.latency.inference_ms}ms | Decode: ${data.latency.decoding_ms}ms`;
+                    }
+                    resultSection.classList.remove('hidden');
+                } else {
+                    // API Error
+                    showError(data.error || 'Failed to recognize text. Please try again.');
+                }
+            }, 500);
 
         } catch (err) {
+            clearInterval(statusInterval);
             loadingState.classList.add('hidden');
             showError('Network error. Please check your connection and try again.');
         } finally {

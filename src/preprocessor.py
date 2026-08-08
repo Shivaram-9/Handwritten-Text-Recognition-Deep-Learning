@@ -57,10 +57,10 @@ class ImagePreprocessor:
             
         resized = cv2.resize(thresh, (new_w, new_h), interpolation=cv2.INTER_AREA)
         
-        final_img = np.zeros((target_h, target_w), dtype=np.float32)
+        final_img = np.zeros((target_h, target_w), dtype=np.uint8)
         start_x = (target_w - new_w) // 2
         start_y = (target_h - new_h) // 2
-        final_img[start_y:start_y+new_h, start_x:start_x+new_w] = resized.astype(np.float32) / 255.0
+        final_img[start_y:start_y+new_h, start_x:start_x+new_w] = resized
         return final_img
 
     def segment_document(self, image_path):
@@ -197,10 +197,30 @@ class ImagePreprocessor:
             logger.error(f"Error processing {image_path}: {str(e)}")
             return None, False
 
-    def process_dataset(self):
+    def _process_single_image(self, img_path):
+        """Helper to process a single image for multiprocessing."""
+        rel_path = os.path.relpath(img_path, self.raw_dir)
+        dest_path = os.path.join(self.processed_dir, rel_path)
+        
+        if os.path.exists(dest_path):
+            return True, True # (Success, Skipped)
+            
+        processed_img, success = self.preprocess_image(img_path)
+        
+        if success:
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            cv2.imwrite(dest_path, processed_img)
+            return True, False
+        else:
+            return False, False
+
+    def process_dataset(self, sample_size=None):
         """
         Iterates over the raw dataset, processes each image, and saves it.
+        Uses multiprocessing for speed and skips already processed files.
         """
+        import concurrent.futures
+        
         logger.info(f"Starting Preprocessing Pipeline.")
         logger.info(f"Source: {self.raw_dir}")
         logger.info(f"Destination: {self.processed_dir}")
@@ -217,6 +237,9 @@ class ImagePreprocessor:
                 if file.endswith(('.png', '.jpg', '.jpeg')):
                     image_files.append(os.path.join(root, file))
                     
+        if sample_size and sample_size > 0:
+            image_files = image_files[:sample_size]
+            
         total_files = len(image_files)
         logger.info(f"Total image files found: {total_files}")
         
@@ -226,31 +249,37 @@ class ImagePreprocessor:
 
         success_count = 0
         corrupt_count = 0
+        skipped_count = 0
         
-        # 8. Skip corrupted files and Display Progress Bar
-        for img_path in tqdm(image_files, desc="Preprocessing Images"):
-            processed_img, success = self.preprocess_image(img_path)
+        max_workers = min(32, os.cpu_count() + 4)
+        logger.info(f"Using {max_workers} worker processes.")
+        
+        with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+            # Map returns results in order, which is fine, but imap_unordered or as_completed is better for tqdm
+            futures = [executor.submit(self._process_single_image, path) for path in image_files]
             
-            if success:
-                # 9. Store Processed Images Separately
-                # Maintain the same directory tree architecture as the raw dataset
-                rel_path = os.path.relpath(img_path, self.raw_dir)
-                dest_path = os.path.join(self.processed_dir, rel_path)
-                
-                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                cv2.imwrite(dest_path, processed_img)
-                success_count += 1
-            else:
-                corrupt_count += 1
+            for future in tqdm(concurrent.futures.as_completed(futures), total=total_files, desc="Preprocessing Images"):
+                success, skipped = future.result()
+                if skipped:
+                    skipped_count += 1
+                elif success:
+                    success_count += 1
+                else:
+                    corrupt_count += 1
 
         # 10. Generate Preprocessing Log
         logger.info("=================================")
         logger.info("    PREPROCESSING COMPLETED      ")
         logger.info("=================================")
         logger.info(f"Total Processed Successfully: {success_count}")
-        logger.info(f"Total Skipped/Corrupted: {corrupt_count}")
+        logger.info(f"Total Skipped (Already Processed): {skipped_count}")
+        logger.info(f"Total Corrupted/Failed: {corrupt_count}")
         logger.info(f"Log file saved to: {log_file}")
 
 if __name__ == "__main__":
     preprocessor = ImagePreprocessor()
-    preprocessor.process_dataset()
+    # Process 20 images first if passed as argument
+    if len(sys.argv) > 1 and sys.argv[1] == '--sample':
+        preprocessor.process_dataset(sample_size=20)
+    else:
+        preprocessor.process_dataset()

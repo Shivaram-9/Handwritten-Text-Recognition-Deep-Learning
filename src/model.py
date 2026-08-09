@@ -144,8 +144,8 @@ class HTRModel:
         """
         input_len = np.ones(predictions.shape[0]) * predictions.shape[1]
         
-        # Use Keras backend CTC decode
-        decoded, log_probs = K.ctc_decode(predictions, input_length=input_len, greedy=True)
+        # Use Keras backend CTC decode with Beam Search
+        decoded, log_probs = K.ctc_decode(predictions, input_length=input_len, greedy=False, beam_width=10)
         
         # Convert index sequence back to string
         results = []
@@ -160,9 +160,9 @@ class HTRModel:
                     res += char_map[x]
             results.append(res)
             
-            # Confidence is derived from negative log probabilities
-            # Taking exponential converts negative log prob back to a probability [0, 1]
-            conf = np.exp(-log_probs[i][0].numpy())
+            # Confidence is derived from log probabilities
+            # Taking exponential converts log prob back to a probability [0, 1]
+            conf = np.exp(log_probs[i][0].numpy())
             confidences.append(float(conf))
             
         return results, confidences

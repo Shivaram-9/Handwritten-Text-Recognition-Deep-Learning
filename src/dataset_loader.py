@@ -99,6 +99,20 @@ class DatasetLoader:
         
         # Batch and prefetch
         dataset = dataset.batch(self.batch_size)
+        
+        if is_training:
+            data_augmentation = tf.keras.Sequential([
+                tf.keras.layers.RandomRotation(factor=(-0.02, 0.02), fill_mode='constant', fill_value=0.0),
+                tf.keras.layers.RandomTranslation(height_factor=0.05, width_factor=0.05, fill_mode='constant', fill_value=0.0),
+                # No aggressive shear/zoom to preserve handwriting readability
+            ])
+            
+            def augment_batch(inputs, targets):
+                inputs['image_input'] = data_augmentation(inputs['image_input'], training=True)
+                return inputs, targets
+                
+            dataset = dataset.map(augment_batch, num_parallel_calls=AUTOTUNE)
+            
         dataset = dataset.prefetch(buffer_size=AUTOTUNE)
         
         return dataset

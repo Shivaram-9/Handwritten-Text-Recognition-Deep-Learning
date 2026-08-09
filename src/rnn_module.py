@@ -57,14 +57,14 @@ class RNNSequenceLearner:
         # First Bidirectional LSTM Layer
         # return_sequences=True is critical for CTC Loss to map each time step to characters
         lstm_1 = layers.Bidirectional(
-            layers.LSTM(self.lstm_units, return_sequences=True, dropout=0.25),
+            layers.LSTM(self.lstm_units, return_sequences=True, dropout=0.3),
             name="bilstm_1"
         )(inputs)
         
         # Second Bidirectional LSTM Layer
         # Stacking a second layer allows the model to learn more complex sequence semantics
         lstm_2 = layers.Bidirectional(
-            layers.LSTM(self.lstm_units, return_sequences=True, dropout=0.25),
+            layers.LSTM(self.lstm_units, return_sequences=True, dropout=0.3),
             name="bilstm_2"
         )(lstm_1)
         

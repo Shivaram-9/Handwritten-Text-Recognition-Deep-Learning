@@ -108,7 +108,7 @@ class ModelTrainer:
         callbacks = [
             EarlyStopping(
                 monitor='val_loss', 
-                patience=2, 
+                patience=8, 
                 restore_best_weights=True,
                 verbose=1
             ),
@@ -129,7 +129,7 @@ class ModelTrainer:
             ReduceLROnPlateau(
                 monitor='val_loss', 
                 factor=0.5, 
-                patience=5, 
+                patience=3, 
                 min_lr=1e-6,
                 verbose=1
             ),

@@ -76,7 +76,7 @@ class CNNFeatureExtractor:
         x = layers.MaxPooling2D(pool_size=(2, 1), name="pool_5")(x)  # H: 1, W: 32
         
         # Regularization
-        x = layers.Dropout(0.2, name="dropout")(x)
+        x = layers.Dropout(0.3, name="dropout")(x)
         
         # The output shape here is (Batch, 1, 32, 256)
         # We need to squeeze the height dimension out to make it a sequence of 32 time steps, 

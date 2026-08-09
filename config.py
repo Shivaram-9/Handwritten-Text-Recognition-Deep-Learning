@@ -17,8 +17,8 @@ class Config:
     # Model Configuration
     IMAGE_WIDTH = int(os.environ.get('IMAGE_WIDTH', 128))
     IMAGE_HEIGHT = int(os.environ.get('IMAGE_HEIGHT', 32))
-    BATCH_SIZE = int(os.environ.get('BATCH_SIZE', 64))
-    EPOCHS = int(os.environ.get('EPOCHS', 10))
+    BATCH_SIZE = int(os.environ.get('BATCH_SIZE', 32))
+    EPOCHS = 30
     MAX_TEXT_LENGTH = int(os.environ.get('MAX_TEXT_LENGTH', 32))
     VOCAB_SIZE = int(os.environ.get('VOCAB_SIZE', 80))
     

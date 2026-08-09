@@ -43,7 +43,7 @@ def main():
 
     # 4. Initialize Trainer
     logger.info("Initializing Model Trainer...")
-    trainer = ModelTrainer(resume_training=False)
+    trainer = ModelTrainer(resume_training=True)
     
     # 5. Train Model
     logger.info("Starting Training...")

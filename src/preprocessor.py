@@ -79,17 +79,16 @@ class ImagePreprocessor:
             if orig_bgr is None: return False, None, None, None, None
             b64_orig = img_to_b64(orig_bgr)
 
-            # 2. Convert to Grayscale & Contrast (CLAHE)
+            # 2. Convert to Grayscale
             gray = cv2.cvtColor(orig_bgr, cv2.COLOR_BGR2GRAY)
-            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-            enhanced = clahe.apply(gray)
+            working_img = gray.copy()
 
             # 3. Document Edge Detection & Perspective Correction (Fast Heuristic)
             # Resize for faster edge detection
-            ratio = enhanced.shape[0] / 500.0
-            small = cv2.resize(enhanced, (int(enhanced.shape[1]/ratio), 500))
-            blurred = cv2.GaussianBlur(small, (5, 5), 0)
-            edged = cv2.Canny(blurred, 75, 200)
+            ratio = working_img.shape[0] / 500.0
+            small = cv2.resize(working_img, (int(working_img.shape[1]/ratio), 500))
+            blurred_edge = cv2.GaussianBlur(small, (5, 5), 0)
+            edged = cv2.Canny(blurred_edge, 75, 200)
             
             cnts, _ = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             if cnts:
@@ -127,12 +126,12 @@ class ImagePreprocessor:
                     ], dtype="float32")
                     
                     M = cv2.getPerspectiveTransform(rect, dst)
-                    enhanced = cv2.warpPerspective(enhanced, M, (maxWidth, maxHeight))
+                    working_img = cv2.warpPerspective(working_img, M, (maxWidth, maxHeight))
 
-            # 4. Adaptive Thresholding (Matched to training pipeline)
-            blurred = cv2.GaussianBlur(enhanced, (5, 5), 0)
-            thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
-            cleaned = thresh
+            # 4. Thresholding for Segmentation (Robust for full document)
+            blurred = cv2.GaussianBlur(working_img, (5, 5), 0)
+            # Large block size prevents static noise on high-res images
+            cleaned = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 51, 10)
             b64_prep = img_to_b64(cleaned)
 
             # 5. Line Segmentation via Horizontal Projection Profile
@@ -161,14 +160,19 @@ class ImagePreprocessor:
                     x1 = max(0, x - pad)
                     x2 = min(cleaned.shape[1], x + w + pad)
                     
-                    line_crop = cleaned[y1:y2, x1:x2]
+                    # Crop from the ORIGINAL grayscale image, not the segmentation map
+                    line_crop_gray = working_img[y1:y2, x1:x2]
+                    
+                    # Apply EXACT training preprocessing to the tightly cropped line
+                    line_blurred = cv2.GaussianBlur(line_crop_gray, (5, 5), 0)
+                    line_thresh = cv2.adaptiveThreshold(line_blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
                     
                     # Convert to required neural network format
-                    final_tensor = self._pad_and_resize(line_crop)
+                    final_tensor = self._pad_and_resize(line_thresh)
                     segmented_lines.append(final_tensor)
                     
                     # Store visual for frontend
-                    b64_lines.append(img_to_b64(line_crop))
+                    b64_lines.append(img_to_b64(line_thresh))
 
             # Fallback if no valid lines found
             if len(segmented_lines) == 0:

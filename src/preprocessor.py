@@ -130,49 +130,79 @@ class ImagePreprocessor:
 
             # 4. Thresholding for Segmentation (Robust for full document)
             blurred = cv2.GaussianBlur(working_img, (5, 5), 0)
-            # Large block size prevents static noise on high-res images
             cleaned = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 51, 10)
             b64_prep = img_to_b64(cleaned)
 
-            # 5. Line Segmentation via Horizontal Projection Profile
-            # Dilate horizontally to connect characters in a line
-            dilate_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (50, 2))
+            # 5. WORD Segmentation via Horizontal Projection Profile
+            # Dilate horizontally with small kernel to connect characters into words
+            dilate_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 2))
             dilated = cv2.dilate(cleaned, dilate_kernel, iterations=1)
             
             line_cnts, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
-            # Sort contours top-to-bottom
             if not line_cnts: return False, None, None, None, None
             bounding_boxes = [cv2.boundingRect(c) for c in line_cnts]
-            (line_cnts, bounding_boxes) = zip(*sorted(zip(line_cnts, bounding_boxes), key=lambda b: b[1][1]))
+            
+            # Sort top-to-bottom first, then cluster into lines, then left-to-right
+            bounding_boxes.sort(key=lambda b: b[1])
+            lines = []
+            current_line = []
+            prev_y = bounding_boxes[0][1]
+            prev_h = bounding_boxes[0][3]
+            for box in bounding_boxes:
+                # If Y is within half the height of the previous box, it's the same line
+                if abs(box[1] - prev_y) < (prev_h / 2):
+                    current_line.append(box)
+                else:
+                    current_line.sort(key=lambda b: b[0]) # Sort X left-to-right
+                    lines.extend(current_line)
+                    current_line = [box]
+                    prev_y = box[1]
+                    prev_h = box[3]
+            current_line.sort(key=lambda b: b[0])
+            lines.extend(current_line)
+            
+            bounding_boxes = lines
             
             segmented_lines = []
             b64_lines = []
             
             for (x, y, w, h) in bounding_boxes:
-                # 6. Filter non-handwritten regions (too small, too tall, likely borders)
-                aspect_ratio = w / float(h)
-                if w > 20 and h > 15 and aspect_ratio > 1.2:
-                    # Pad slightly
+                # 6. Filter noise regions (words can have w < h like "I")
+                if w > 5 and h > 15:
                     pad = 5
                     y1 = max(0, y - pad)
                     y2 = min(cleaned.shape[0], y + h + pad)
                     x1 = max(0, x - pad)
                     x2 = min(cleaned.shape[1], x + w + pad)
                     
-                    # Crop from the ORIGINAL grayscale image, not the segmentation map
-                    line_crop_gray = working_img[y1:y2, x1:x2]
+                    # Crop from ORIGINAL grayscale image
+                    word_crop_gray = working_img[y1:y2, x1:x2]
                     
-                    # Apply EXACT training preprocessing to the tightly cropped line
-                    line_blurred = cv2.GaussianBlur(line_crop_gray, (5, 5), 0)
-                    line_thresh = cv2.adaptiveThreshold(line_blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+                    # Resize to model height (32) FIRST
+                    aspect_ratio = word_crop_gray.shape[1] / word_crop_gray.shape[0]
+                    target_h = self.target_size[1]
+                    target_w = int(target_h * aspect_ratio)
                     
-                    # Convert to required neural network format
-                    final_tensor = self._pad_and_resize(line_thresh)
+                    if target_w == 0 or target_h == 0:
+                        continue
+                        
+                    scaled_gray = cv2.resize(word_crop_gray, (target_w, target_h), interpolation=cv2.INTER_AREA)
+                    
+                    # THEN apply EXACT training preprocessing thresholding
+                    word_blurred = cv2.GaussianBlur(scaled_gray, (5, 5), 0)
+                    word_thresh = cv2.adaptiveThreshold(word_blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+                    
+                    # Pad width to 128 (center aligned as in training _pad_and_resize)
+                    final_tensor = np.zeros((self.target_size[1], self.target_size[0]), dtype=np.uint8)
+                    w_copy = min(target_w, self.target_size[0])
+                    start_x = (self.target_size[0] - w_copy) // 2
+                    
+                    # Only copy up to the max width
+                    final_tensor[:, start_x:start_x+w_copy] = word_thresh[:, :w_copy]
+                    
                     segmented_lines.append(final_tensor)
-                    
-                    # Store visual for frontend
-                    b64_lines.append(img_to_b64(line_thresh))
+                    b64_lines.append(img_to_b64(final_tensor))
 
             # Fallback if no valid lines found
             if len(segmented_lines) == 0:

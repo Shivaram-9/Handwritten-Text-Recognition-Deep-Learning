@@ -133,76 +133,123 @@ class ImagePreprocessor:
             cleaned = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 51, 10)
             b64_prep = img_to_b64(cleaned)
 
-            # 5. WORD Segmentation via Horizontal Projection Profile
-            # Dilate horizontally with small kernel to connect characters into words
-            dilate_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 2))
+            # 5. Dynamic Component Grouping
+            # Very small dilation just to merge disconnected character strokes
+            dilate_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
             dilated = cv2.dilate(cleaned, dilate_kernel, iterations=1)
             
-            line_cnts, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cnts, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if not cnts: return False, None, None, None, None
             
-            if not line_cnts: return False, None, None, None, None
-            bounding_boxes = [cv2.boundingRect(c) for c in line_cnts]
+            # Filter noise components FIRST so they don't skew the median width
+            char_boxes = []
+            for c in cnts:
+                x, y, w, h = cv2.boundingRect(c)
+                # Ignore very small dots and thin lines
+                if w > 10 and h > 15:
+                    char_boxes.append((x, y, w, h))
+                    
+            if not char_boxes: return False, None, None, None, None
             
-            # Sort top-to-bottom first, then cluster into lines, then left-to-right
-            bounding_boxes.sort(key=lambda b: b[1])
+            # Sort top-to-bottom
+            char_boxes.sort(key=lambda b: b[1])
+            
+            # Cluster into lines
             lines = []
             current_line = []
-            prev_y = bounding_boxes[0][1]
-            prev_h = bounding_boxes[0][3]
-            for box in bounding_boxes:
-                # If Y is within half the height of the previous box, it's the same line
-                if abs(box[1] - prev_y) < (prev_h / 2):
+            prev_y = char_boxes[0][1]
+            prev_h = char_boxes[0][3]
+            
+            for box in char_boxes:
+                # Update prev_y/prev_h to a running average for better line stability
+                if abs(box[1] - prev_y) < (prev_h / 1.5):
                     current_line.append(box)
                 else:
-                    current_line.sort(key=lambda b: b[0]) # Sort X left-to-right
-                    lines.extend(current_line)
+                    lines.append(current_line)
                     current_line = [box]
                     prev_y = box[1]
                     prev_h = box[3]
-            current_line.sort(key=lambda b: b[0])
-            lines.extend(current_line)
+            if current_line:
+                lines.append(current_line)
+                
+            word_boxes = []
             
-            bounding_boxes = lines
+            # Group components into words
+            for line in lines:
+                if not line: continue
+                # Sort line left-to-right
+                line.sort(key=lambda b: b[0])
+                
+                # Compute statistics for the line
+                widths = [b[2] for b in line]
+                median_w = np.median(widths) if widths else 15
+                gap_threshold = max(20, median_w * 1.5) # Generous gap threshold to prevent splitting words
+                
+                current_word_box = list(line[0])
+                
+                for i in range(1, len(line)):
+                    curr = line[i]
+                    prev_x = current_word_box[0]
+                    prev_w = current_word_box[2]
+                    curr_x = curr[0]
+                    
+                    gap = curr_x - (prev_x + prev_w)
+                    
+                    if gap <= gap_threshold:
+                        # Merge boxes
+                        new_x = min(current_word_box[0], curr[0])
+                        new_y = min(current_word_box[1], curr[1])
+                        new_xw = max(current_word_box[0] + current_word_box[2], curr[0] + curr[2])
+                        new_yh = max(current_word_box[1] + current_word_box[3], curr[1] + curr[3])
+                        
+                        current_word_box = [new_x, new_y, new_xw - new_x, new_yh - new_y]
+                    else:
+                        # Gap is too large, end current word
+                        word_boxes.append(tuple(current_word_box))
+                        current_word_box = list(curr)
+                        
+                word_boxes.append(tuple(current_word_box))
+            
+            # Enforce reading order: top-to-bottom, left-to-right (already mostly sorted by line clustering)
+            word_boxes.sort(key=lambda b: (b[1]//30, b[0]))
             
             segmented_lines = []
             b64_lines = []
             
-            for (x, y, w, h) in bounding_boxes:
-                # 6. Filter noise regions (words can have w < h like "I")
-                if w > 5 and h > 15:
-                    pad = 5
-                    y1 = max(0, y - pad)
-                    y2 = min(cleaned.shape[0], y + h + pad)
-                    x1 = max(0, x - pad)
-                    x2 = min(cleaned.shape[1], x + w + pad)
+            for (x, y, w, h) in word_boxes:
+                pad = 10
+                y1 = max(0, y - pad)
+                y2 = min(cleaned.shape[0], y + h + pad)
+                x1 = max(0, x - pad)
+                x2 = min(cleaned.shape[1], x + w + pad)
                     
-                    # Crop from ORIGINAL grayscale image
-                    word_crop_gray = working_img[y1:y2, x1:x2]
+                # Crop from ORIGINAL grayscale image
+                word_crop_gray = working_img[y1:y2, x1:x2]
+                
+                # Resize to model height (32) FIRST
+                aspect_ratio = word_crop_gray.shape[1] / word_crop_gray.shape[0]
+                target_h = self.target_size[1]
+                target_w = int(target_h * aspect_ratio)
+                
+                if target_w == 0 or target_h == 0:
+                    continue
                     
-                    # Resize to model height (32) FIRST
-                    aspect_ratio = word_crop_gray.shape[1] / word_crop_gray.shape[0]
-                    target_h = self.target_size[1]
-                    target_w = int(target_h * aspect_ratio)
-                    
-                    if target_w == 0 or target_h == 0:
-                        continue
-                        
-                    scaled_gray = cv2.resize(word_crop_gray, (target_w, target_h), interpolation=cv2.INTER_AREA)
-                    
-                    # THEN apply EXACT training preprocessing thresholding
-                    word_blurred = cv2.GaussianBlur(scaled_gray, (5, 5), 0)
-                    word_thresh = cv2.adaptiveThreshold(word_blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
-                    
-                    # Pad width to 128 (center aligned as in training _pad_and_resize)
-                    final_tensor = np.zeros((self.target_size[1], self.target_size[0]), dtype=np.uint8)
-                    w_copy = min(target_w, self.target_size[0])
-                    start_x = (self.target_size[0] - w_copy) // 2
-                    
-                    # Only copy up to the max width
-                    final_tensor[:, start_x:start_x+w_copy] = word_thresh[:, :w_copy]
-                    
-                    segmented_lines.append(final_tensor)
-                    b64_lines.append(img_to_b64(final_tensor))
+                scaled_gray = cv2.resize(word_crop_gray, (target_w, target_h), interpolation=cv2.INTER_AREA)
+                
+                # THEN apply EXACT training preprocessing thresholding
+                word_blurred = cv2.GaussianBlur(scaled_gray, (5, 5), 0)
+                word_thresh = cv2.adaptiveThreshold(word_blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+                
+                # Pad width to 128 (center aligned as in training _pad_and_resize)
+                final_tensor = np.zeros((self.target_size[1], self.target_size[0]), dtype=np.uint8)
+                w_copy = min(target_w, self.target_size[0])
+                start_x = (self.target_size[0] - w_copy) // 2
+                
+                # Only copy up to the max width
+                final_tensor[:, start_x:start_x+w_copy] = word_thresh[:, :w_copy]
+                
+                segmented_lines.append(final_tensor)
+                b64_lines.append(img_to_b64(final_tensor))
 
             # Fallback if no valid lines found
             if len(segmented_lines) == 0:

@@ -170,6 +170,7 @@ class HTRPredictor:
             for line_tensor in segmented_lines:
                 img_batch = np.expand_dims(line_tensor, axis=-1)
                 img_batch = np.expand_dims(img_batch, axis=0)
+                img_batch = img_batch / 255.0
                 input_tensor = tf.convert_to_tensor(img_batch, dtype=tf.float32)
                 
                 try:
@@ -210,6 +211,7 @@ class HTRPredictor:
                 
             img_batch = np.expand_dims(processed_img, axis=-1)
             img_batch = np.expand_dims(img_batch, axis=0)
+            img_batch = img_batch / 255.0
             input_tensor = tf.convert_to_tensor(img_batch, dtype=tf.float32)
             
             try:

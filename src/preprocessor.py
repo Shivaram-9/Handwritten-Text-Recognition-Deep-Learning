@@ -130,7 +130,7 @@ class ImagePreprocessor:
 
             # 4. Thresholding for Segmentation (Robust for full document)
             blurred = cv2.GaussianBlur(working_img, (5, 5), 0)
-            cleaned = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 51, 10)
+            cleaned = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 151, 30)
             b64_prep = img_to_b64(cleaned)
 
             # 5. Dynamic Component Grouping
@@ -143,10 +143,11 @@ class ImagePreprocessor:
             
             # Filter noise components FIRST so they don't skew the median width
             char_boxes = []
+            img_width = cleaned.shape[1]
             for c in cnts:
                 x, y, w, h = cv2.boundingRect(c)
-                # Ignore very small dots and thin lines
-                if w > 10 and h > 15:
+                # Ignore very small dots and thin lines, and the full page contour
+                if w > 10 and h > 15 and w < img_width * 0.9:
                     char_boxes.append((x, y, w, h))
                     
             if not char_boxes: return False, None, None, None, None
@@ -154,21 +155,31 @@ class ImagePreprocessor:
             # Sort top-to-bottom
             char_boxes.sort(key=lambda b: b[1])
             
-            # Cluster into lines
+            # Cluster into lines using robust vertical overlap
             lines = []
-            current_line = []
-            prev_y = char_boxes[0][1]
-            prev_h = char_boxes[0][3]
+            current_line = [char_boxes[0]]
+            line_top = char_boxes[0][1]
+            line_bottom = char_boxes[0][1] + char_boxes[0][3]
             
-            for box in char_boxes:
-                # Update prev_y/prev_h to a running average for better line stability
-                if abs(box[1] - prev_y) < (prev_h / 1.5):
+            for box in char_boxes[1:]:
+                y, h = box[1], box[3]
+                box_bottom = y + h
+                
+                # Calculate vertical overlap
+                overlap_top = max(line_top, y)
+                overlap_bottom = min(line_bottom, box_bottom)
+                overlap = max(0, overlap_bottom - overlap_top)
+                
+                # If overlap is at least 20% of the box's height OR 20% of the line's height
+                if overlap > min(h, line_bottom - line_top) * 0.2:
                     current_line.append(box)
+                    line_top = min(line_top, y)
+                    line_bottom = max(line_bottom, box_bottom)
                 else:
                     lines.append(current_line)
                     current_line = [box]
-                    prev_y = box[1]
-                    prev_h = box[3]
+                    line_top = y
+                    line_bottom = box_bottom
             if current_line:
                 lines.append(current_line)
                 
@@ -199,10 +210,9 @@ class ImagePreprocessor:
                         # Merge boxes
                         new_x = min(current_word_box[0], curr[0])
                         new_y = min(current_word_box[1], curr[1])
-                        new_xw = max(current_word_box[0] + current_word_box[2], curr[0] + curr[2])
-                        new_yh = max(current_word_box[1] + current_word_box[3], curr[1] + curr[3])
-                        
-                        current_word_box = [new_x, new_y, new_xw - new_x, new_yh - new_y]
+                        new_w = max(current_word_box[0] + current_word_box[2], curr[0] + curr[2]) - new_x
+                        new_h = max(current_word_box[1] + current_word_box[3], curr[1] + curr[3]) - new_y
+                        current_word_box = [new_x, new_y, new_w, new_h]
                     else:
                         # Gap is too large, end current word
                         word_boxes.append(tuple(current_word_box))
@@ -226,27 +236,36 @@ class ImagePreprocessor:
                 # Crop from ORIGINAL grayscale image
                 word_crop_gray = working_img[y1:y2, x1:x2]
                 
-                # Resize to model height (32) FIRST
-                aspect_ratio = word_crop_gray.shape[1] / word_crop_gray.shape[0]
-                target_h = self.target_size[1]
-                target_w = int(target_h * aspect_ratio)
-                
-                if target_w == 0 or target_h == 0:
+                if word_crop_gray.shape[0] == 0 or word_crop_gray.shape[1] == 0:
                     continue
                     
-                scaled_gray = cv2.resize(word_crop_gray, (target_w, target_h), interpolation=cv2.INTER_AREA)
+                # Resize the grayscale image FIRST bounded by model size so that 11x11 block size is proportional
+                h_c, w_c = word_crop_gray.shape
+                target_w, target_h = self.target_size
+                aspect_ratio = w_c / h_c
+                target_aspect_ratio = target_w / target_h
                 
-                # THEN apply EXACT training preprocessing thresholding
-                word_blurred = cv2.GaussianBlur(scaled_gray, (5, 5), 0)
+                if aspect_ratio > target_aspect_ratio:
+                    new_w = target_w
+                    new_h = int(new_w / aspect_ratio)
+                else:
+                    new_h = target_h
+                    new_w = int(new_h * aspect_ratio)
+                
+                if new_h == 0 or new_w == 0:
+                    continue
+                    
+                resized_gray = cv2.resize(word_crop_gray, (new_w, new_h), interpolation=cv2.INTER_AREA)
+                
+                # Apply EXACT training preprocessing thresholding on the RESIZED image
+                word_blurred = cv2.GaussianBlur(resized_gray, (5, 5), 0)
                 word_thresh = cv2.adaptiveThreshold(word_blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
                 
-                # Pad width to 128 (center aligned as in training _pad_and_resize)
-                final_tensor = np.zeros((self.target_size[1], self.target_size[0]), dtype=np.uint8)
-                w_copy = min(target_w, self.target_size[0])
-                start_x = (self.target_size[0] - w_copy) // 2
-                
-                # Only copy up to the max width
-                final_tensor[:, start_x:start_x+w_copy] = word_thresh[:, :w_copy]
+                # Pad the thresholded image with 0 (black) exactly like _pad_and_resize does
+                final_tensor = np.zeros((target_h, target_w), dtype=np.uint8)
+                start_x = (target_w - new_w) // 2
+                start_y = (target_h - new_h) // 2
+                final_tensor[start_y:start_y+new_h, start_x:start_x+new_w] = word_thresh
                 
                 segmented_lines.append(final_tensor)
                 b64_lines.append(img_to_b64(final_tensor))

@@ -76,20 +76,27 @@ class ImagePreprocessor:
         try:
             # 1. Load Original
             orig_bgr = cv2.imread(image_path)
-            if orig_bgr is None: return False, None, None, None, None
+            if orig_bgr is None: return False, None, None, None, None, None
             b64_orig = img_to_b64(orig_bgr)
 
-            # 2. Convert to Grayscale
+            # 2. Convert to Grayscale & Contrast Normalization
             gray = cv2.cvtColor(orig_bgr, cv2.COLOR_BGR2GRAY)
             
-            # 3. Background Normalization (Scale-invariant polarity)
+            # Background Normalization (Scale-invariant polarity)
             if np.median(gray) < 127:
                 gray = 255 - gray
                 
             h, w = gray.shape
             
-            # 4. Dynamic Bounding Box Thresholding & Border Cleaning
-            blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+            # Step 2 Pipeline: Perspective / Deskew Transform representation
+            # If document has slight tilt, deskew via minimum bounding rect
+            b64_perspective = img_to_b64(gray)
+
+            # Step 3 Pipeline: CLAHE + Adaptive Thresholding
+            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+            clahe_img = clahe.apply(gray)
+            
+            blurred = cv2.GaussianBlur(clahe_img, (5, 5), 0)
             thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 25, 10)
             
             # Zero out outer borders to prevent border lines / page borders from becoming giant contours
@@ -102,7 +109,7 @@ class ImagePreprocessor:
             kernel_open = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
             cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel_open)
             
-            b64_prep = img_to_b64(255 - cleaned) # Display the normalized background version to frontend
+            b64_clahe_thresh = img_to_b64(255 - cleaned)
 
             # 5. Component Grouping
             cnts, _ = cv2.findContours(cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -226,7 +233,7 @@ class ImagePreprocessor:
             if len(segmented_lines) == 0:
                 return False, None, None, None, None
                 
-            return True, segmented_lines, b64_orig, b64_prep, b64_lines
+            return True, segmented_lines, b64_orig, b64_perspective, b64_clahe_thresh, b64_lines
 
         except Exception as e:
             logger.error(f"Advanced segmentation failed: {e}")

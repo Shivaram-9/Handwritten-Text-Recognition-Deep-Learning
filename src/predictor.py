@@ -148,7 +148,7 @@ class HTRPredictor:
             
         # 1. Attempt Advanced Document Segmentation
         t0 = time.perf_counter()
-        is_doc, segmented_lines, b64_orig, b64_prep, b64_lines = self.preprocessor.segment_document(image_path)
+        is_doc, segmented_lines, b64_orig, b64_perspective, b64_clahe_thresh, b64_lines = self.preprocessor.segment_document(image_path)
         
         if is_doc and segmented_lines and len(segmented_lines) > 0:
             t1 = time.perf_counter()
@@ -156,7 +156,9 @@ class HTRPredictor:
             
             pipeline_images = {
                 "original": b64_orig,
-                "preprocessed": b64_prep,
+                "perspective": b64_perspective,
+                "clahe_thresh": b64_clahe_thresh,
+                "preprocessed": b64_clahe_thresh,
                 "lines": b64_lines
             }
             

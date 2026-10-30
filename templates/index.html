@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuralText | AI Handwritten Text Recognition Platform</title>
+    <title>Handwritten Text Recognition | Using Deep Learning</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,186 +11,186 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <!-- Futuristic Unified Background System -->
+    <!-- Advanced Futuristic Canvas & Glow Background -->
     <div class="futuristic-bg-container" aria-hidden="true">
-        <!-- Interactive & Autonomous Canvas for Neural Network & Flowing Particles -->
         <canvas id="neuralCanvas"></canvas>
-        <div class="bg-gradient-glow glow-1"></div>
-        <div class="bg-gradient-glow glow-2"></div>
-        <div class="bg-gradient-glow glow-3"></div>
+        <div class="bg-neural-glow glow-top-left"></div>
+        <div class="bg-neural-glow glow-top-right"></div>
+        <div class="bg-neural-glow glow-bottom-left"></div>
+        <div class="bg-neural-glow glow-center"></div>
         <div class="bg-cyber-grid"></div>
-        <div class="bg-radial-overlay"></div>
+        <div class="bg-radial-vignette"></div>
     </div>
 
-    <!-- Header / Navigation Bar -->
+    <!-- Top Header Navigation Bar (Matches Reference) -->
     <header class="header-nav-wrapper">
         <nav class="navbar main-container">
             <a href="#hero" class="nav-brand">
                 <div class="brand-logo-icon">
-                    <i data-lucide="brain-circuit"></i>
+                    <i data-lucide="brain"></i>
                 </div>
                 <div class="brand-text-group">
-                    <span class="brand-title">NeuralText</span>
+                    <span class="brand-title">Handwritten Text Recognition</span>
                     <span class="brand-subtitle">Using Deep Learning</span>
                 </div>
             </a>
 
-            <!-- Desktop Navigation Links -->
+            <!-- Reference Navigation Pill Menu -->
             <ul class="nav-menu" id="navMenu">
-                <li class="nav-item"><a href="#hero" class="nav-link active">Home</a></li>
-                <li class="nav-item"><a href="#how-it-works" class="nav-link">How It Works</a></li>
-                <li class="nav-item"><a href="#upload-section" class="nav-link">Recognition</a></li>
-                <li class="nav-item"><a href="#pipeline-section" class="nav-link">CV Pipeline</a></li>
-                <li class="nav-item"><a href="#history-section" class="nav-link">History</a></li>
-                <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+                <li class="nav-item">
+                    <a href="#hero" class="nav-pill active">
+                        <i data-lucide="home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#about" class="nav-pill">
+                        <i data-lucide="info"></i>
+                        <span>About</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#how-it-works" class="nav-pill">
+                        <i data-lucide="settings"></i>
+                        <span>How it Works</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#pipeline-section" class="nav-pill">
+                        <i data-lucide="file-text"></i>
+                        <span>Examples</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#contact" class="nav-pill">
+                        <i data-lucide="mail"></i>
+                        <span>Contact</span>
+                    </a>
+                </li>
             </ul>
 
-            <!-- Header Action Controls -->
             <div class="nav-actions">
-                <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle visual theme" title="Toggle theme">
+                <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle theme">
                     <i data-lucide="sun" id="themeIcon"></i>
                 </button>
-                <a href="#upload-section" class="btn btn-primary btn-sm nav-cta">
-                    <span>Try Platform</span>
-                    <i data-lucide="arrow-right"></i>
-                </a>
-                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu">
-                    <i data-lucide="menu" id="menuIcon"></i>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                    <i data-lucide="menu"></i>
                 </button>
             </div>
         </nav>
     </header>
 
-    <!-- Main Content Area -->
+    <!-- Main Application Page -->
     <main class="page-main-layout">
-        
-        <!-- Hero Section -->
+
+        <!-- Hero Section with Feature Badges (Matches Reference) -->
         <section class="section-hero" id="hero">
-            <div class="main-container hero-container">
-                <div class="hero-badge">
-                    <span class="badge-dot"></span>
-                    <span class="badge-text">Next-Gen Handwriting OCR</span>
-                    <span class="badge-tag">CNN + BiLSTM</span>
+            <div class="main-container hero-container text-center">
+                
+                <!-- Floating decorative glow badges -->
+                <div class="hero-decorative-tag tag-left">
+                    <span class="sparkle-dot"></span>
+                    <span>Images</span>
+                    <span class="tag-sub">Handwritten Text</span>
+                </div>
+                <div class="hero-decorative-tag tag-right">
+                    <span class="sparkle-dot"></span>
+                    <span>Accurate</span>
+                    <span class="tag-sub">Text Recognition</span>
                 </div>
 
                 <h1 class="hero-title">
-                    Convert Handwriting to Text with <span class="gradient-text">AI Precision</span>
+                    Convert Handwriting to <span class="gradient-text-pink">Text with AI</span>
                 </h1>
 
                 <p class="hero-subtitle">
-                    Upload an image of handwritten text and let our deep learning model recognize it.
+                    Upload an image of handwritten text and let our deep learning model recognize it with high accuracy
                 </p>
 
-                <!-- Feature Pill Indicators -->
-                <div class="hero-features-grid">
-                    <div class="feature-pill">
+                <!-- 5 Feature Badges (Exact order & icons as Reference) -->
+                <div class="hero-badges-row">
+                    <div class="feature-badge badge-teal">
                         <i data-lucide="cpu"></i>
                         <span>Deep Learning (CNN + BiLSTM)</span>
                     </div>
-                    <div class="feature-pill">
-                        <i data-lucide="file-text"></i>
-                        <span>Handwriting Recognition</span>
-                    </div>
-                    <div class="feature-pill">
-                        <i data-lucide="align-left"></i>
-                        <span>Multi-line Text Support</span>
-                    </div>
-                    <div class="feature-pill">
-                        <i data-lucide="sparkles"></i>
-                        <span>AI-powered Processing</span>
-                    </div>
-                    <div class="feature-pill">
+                    <div class="feature-badge badge-orange">
                         <i data-lucide="shield-check"></i>
-                        <span>Secure Image Processing</span>
+                        <span>High Accuracy</span>
+                    </div>
+                    <div class="feature-badge badge-blue">
+                        <i data-lucide="list"></i>
+                        <span>Supports Multi-line Text</span>
+                    </div>
+                    <div class="feature-badge badge-purple">
+                        <i data-lucide="clock"></i>
+                        <span>Fast Inference</span>
+                    </div>
+                    <div class="feature-badge badge-magenta">
+                        <i data-lucide="lock"></i>
+                        <span>Secure &amp; Private</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Upload & Studio Section -->
-        <section class="section-upload" id="upload-section">
+        <!-- Studio / Upload Card & Floating Action Button (Matches Reference) -->
+        <section class="section-studio" id="upload-section">
             <div class="main-container">
-                <div class="section-header text-center">
-                    <h2 class="section-title">Handwritten Document Studio</h2>
-                    <p class="section-subtitle">Drop cursive, printed, uppercase, or mixed notes to extract digital transcription in real time.</p>
-                </div>
+                <div class="studio-card-outer glass-card">
+                    <div class="studio-two-col-grid">
 
-                <!-- Two-Column Studio Layout -->
-                <div class="upload-studio-grid glass-card">
-                    
-                    <!-- Left Column: Drag & Drop Zone -->
-                    <div class="studio-col-upload">
-                        <div class="drop-zone" id="dropZone">
-                            <input type="file" id="fileInput" name="file" accept=".jpg, .jpeg, .png" hidden>
+                        <!-- Left Column: Drag & Drop Box with Choose Image Button -->
+                        <div class="studio-upload-box" id="dropZone">
+                            <input type="file" id="fileInput" name="file" accept=".jpg, .jpeg, .png, .webp" hidden>
                             
-                            <div class="drop-content" id="uploadContent">
-                                <div class="upload-pulse-icon">
-                                    <i data-lucide="cloud-upload"></i>
-                                </div>
-                                <h3 class="drop-title">Drag & drop handwriting image</h3>
-                                <p class="drop-subtitle">or click to browse files from your computer</p>
-                                
-                                <div class="upload-meta-info">
-                                    <span class="meta-item"><i data-lucide="image"></i> JPG, JPEG, PNG</span>
-                                    <span class="meta-item"><i data-lucide="hard-drive"></i> Max 16 MB</span>
-                                </div>
-
-                                <button type="button" class="btn btn-secondary btn-sm browse-btn" id="browseBtn">
-                                    <i data-lucide="folder-open"></i>
-                                    <span>Browse Image</span>
-                                </button>
+                            <div class="upload-icon-circle">
+                                <i data-lucide="cloud-upload"></i>
                             </div>
-                        </div>
+                            
+                            <div class="upload-text-group">
+                                <h3 class="upload-main-text">Drag &amp; Drop your image here</h3>
+                                <p class="upload-sub-text">or <span class="text-link" id="browseLink">click to browse</span></p>
+                                <span class="upload-limits-text">Supports: JPG, PNG, JPEG | Max size: 5MB</span>
+                            </div>
 
-                        <div class="upload-instructions">
-                            <i data-lucide="info"></i>
-                            <span>Works best with natural light, clear handwriting strokes, and minimal severe tilt.</span>
-                        </div>
-                    </div>
-
-                    <!-- Right Column: Image Preview & Control -->
-                    <div class="studio-col-preview">
-                        <div class="preview-panel-container">
-                            <div class="preview-empty-state" id="previewEmptyState">
+                            <button type="button" class="btn btn-choose-image" id="chooseImageBtn">
                                 <i data-lucide="image"></i>
-                                <span>No image selected yet</span>
-                                <p>Upload an image on the left to see the high-resolution preview and start AI extraction.</p>
-                            </div>
-
-                            <div class="preview-active-state hidden" id="previewContainer">
-                                <div class="preview-image-wrapper">
-                                    <img id="imagePreview" src="" alt="Handwriting Preview">
-                                    <div class="preview-overlay-tag">
-                                        <i data-lucide="check-circle-2"></i> Ready for Processing
-                                    </div>
-                                </div>
-
-                                <div class="preview-action-toolbar">
-                                    <button type="button" class="btn btn-secondary btn-sm" id="replaceBtn">
-                                        <i data-lucide="refresh-cw"></i>
-                                        <span>Replace</span>
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" id="removeBtn">
-                                        <i data-lucide="trash-2"></i>
-                                        <span>Remove</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Run AI Model Action -->
-                        <div class="studio-cta-wrapper">
-                            <button type="button" class="btn btn-primary btn-large btn-glowing" id="recognizeBtn" disabled>
-                                <i data-lucide="cpu"></i>
-                                <span>Run AI Model</span>
-                                <i data-lucide="arrow-right"></i>
+                                <span>Choose Image</span>
                             </button>
                         </div>
-                    </div>
 
+                        <!-- Right Column: Document Preview Display -->
+                        <div class="studio-preview-box" id="previewArea">
+                            <!-- Empty / Placeholder State -->
+                            <div class="preview-default-note" id="previewDefaultNote">
+                                <div class="lined-paper-card">
+                                    <button type="button" class="paper-close-btn" id="removeBtn" title="Clear image" aria-label="Clear image">
+                                        <i data-lucide="x"></i>
+                                    </button>
+                                    <div class="paper-content-lines">
+                                        <p class="sample-handwriting-text">Code is like humor.</p>
+                                        <p class="sample-handwriting-text">When you have to</p>
+                                        <p class="sample-handwriting-text">explain it, it's bad.</p>
+                                        <p class="sample-handwriting-author">- Cory House</p>
+                                    </div>
+                                    <img id="imagePreview" src="" alt="Uploaded Handwriting Preview" class="uploaded-paper-img hidden">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
-                <!-- Processing / Loading Hologram -->
+                <!-- Floating Glowing Pill: Run AI Model Button (Centered below card) -->
+                <div class="run-ai-wrapper">
+                    <button type="button" class="btn btn-run-ai" id="recognizeBtn">
+                        <i data-lucide="settings"></i>
+                        <span>Run AI Model</span>
+                        <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Loading State Overlay -->
                 <div class="ai-loader-container glass-card hidden" id="loadingState">
                     <div class="loader-visual-core">
                         <div class="pulse-ring ring-1"></div>
@@ -201,9 +201,6 @@
                     <div class="loader-content">
                         <h4 class="loading-title">Neural Engine Active</h4>
                         <p class="loading-text" id="loadingStatusText">Reading stroke matrices...</p>
-                        <div class="loading-bar-wrapper">
-                            <div class="loading-bar-fill"></div>
-                        </div>
                     </div>
                 </div>
 
@@ -222,279 +219,319 @@
             </div>
         </section>
 
-        <!-- Recognition Result Section -->
-        <section class="section-result" id="result-section">
+        <!-- Recognition Result Card (Matches Reference) -->
+        <section class="section-recognition-result" id="result-section">
             <div class="main-container">
-                <div class="glass-card result-dashboard hidden" id="resultSection">
+                <div class="result-outer-card glass-card" id="resultSection">
                     
-                    <div class="result-dashboard-header">
-                        <div class="result-title-group">
-                            <div class="title-with-icon">
-                                <i data-lucide="file-check-2"></i>
-                                <h3>Final Transcription</h3>
+                    <!-- Result Card Header with Action Buttons -->
+                    <div class="result-card-header">
+                        <div class="result-title-block">
+                            <div class="header-icon-badge">
+                                <i data-lucide="file-text"></i>
                             </div>
-                            <span class="live-status-pill"><span class="pulse-green"></span> Inferred by CNN + BiLSTM</span>
+                            <div class="header-titles">
+                                <h3>Recognition Result</h3>
+                                <p>Extracted text from the uploaded image using deep learning</p>
+                            </div>
                         </div>
 
-                        <div class="result-action-buttons">
-                            <button class="btn btn-secondary btn-sm" id="copyBtn" title="Copy text to clipboard">
+                        <div class="result-action-toolbar">
+                            <button type="button" class="btn btn-tool" id="copyBtn">
                                 <i data-lucide="copy"></i>
                                 <span>Copy Text</span>
                             </button>
-                            <button class="btn btn-secondary btn-sm" id="downloadBtn" title="Download as .txt">
+                            <button type="button" class="btn btn-tool" id="downloadBtn">
                                 <i data-lucide="download"></i>
-                                <span>Download Text</span>
+                                <span>Download</span>
                             </button>
-                            <button class="btn btn-secondary btn-sm" id="clearBtn" title="Clear result">
-                                <i data-lucide="rotate-ccw"></i>
-                                <span>Clear Result</span>
+                            <button type="button" class="btn btn-tool btn-tool-clear" id="clearBtn">
+                                <i data-lucide="trash-2"></i>
+                                <span>Clear</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Clean Formatted Transcription Output Box -->
-                    <div class="transcription-output-box">
-                        <pre class="transcription-text" id="recognizedText">Waiting for input...</pre>
-                    </div>
-
-                    <!-- Confidence Gauge & Metrics Row -->
-                    <div class="metrics-summary-grid">
+                    <!-- Result Content Row: Final Transcription + Confidence Score & Metrics -->
+                    <div class="result-grid-row">
                         
-                        <!-- Confidence Card -->
-                        <div class="metric-glass-card confidence-card">
-                            <div class="metric-card-header">
-                                <span class="metric-label">Model Confidence</span>
-                                <span class="metric-badge-value" id="confidenceScoreText">0.0%</span>
+                        <!-- Left Sub-card: Final Transcription -->
+                        <div class="result-subcard transcription-card">
+                            <div class="subcard-header">
+                                <div class="subcard-title-group">
+                                    <i data-lucide="file-text" class="icon-subcard-green"></i>
+                                    <h4>Final <span class="highlight-cyan">Transcription</span></h4>
+                                </div>
+                                <button type="button" class="btn-icon-subcard" id="inlineCopyBtn" title="Copy Transcription">
+                                    <i data-lucide="copy"></i>
+                                </button>
                             </div>
-                            <div class="progress-track">
-                                <div class="progress-fill" id="confidenceProgressBar"></div>
-                            </div>
-                            <span class="metric-caption">Based on Connectionist Temporal Classification token probability</span>
-                        </div>
-
-                        <!-- Preprocessing Time -->
-                        <div class="metric-glass-card">
-                            <div class="metric-stat-icon icon-teal">
-                                <i data-lucide="layers"></i>
-                            </div>
-                            <div class="metric-stat-body">
-                                <span class="metric-label">Preprocessing Time</span>
-                                <h4 class="metric-stat-val" id="metricPrep">-- ms</h4>
-                                <span class="metric-caption">Binarization, CLAHE, Line Slicing</span>
+                            <div class="transcription-body">
+                                <pre class="transcription-text" id="recognizedText">Code is like humor.
+When you have to
+explain it, it's bad.
+- Cory House</pre>
                             </div>
                         </div>
 
-                        <!-- Model Inference Time -->
-                        <div class="metric-glass-card">
-                            <div class="metric-stat-icon icon-purple">
-                                <i data-lucide="zap"></i>
+                        <!-- Right Sub-card: Confidence Score Gauge + Metrics Aligned Stack -->
+                        <div class="result-subcard confidence-score-card">
+                            <div class="subcard-header">
+                                <div class="subcard-title-group">
+                                    <i data-lucide="shield-check" class="icon-subcard-green"></i>
+                                    <h4>Confidence Score</h4>
+                                </div>
                             </div>
-                            <div class="metric-stat-body">
-                                <span class="metric-label">Model Inference</span>
-                                <h4 class="metric-stat-val" id="metricInfer">-- ms</h4>
-                                <span class="metric-caption">CNN Features + BiLSTM Recurrence</span>
+                            
+                            <div class="confidence-and-metrics-flex">
+                                
+                                <!-- Circular Radial Gauge (Matches Reference 84.18%) -->
+                                <div class="radial-gauge-container">
+                                    <svg class="circular-gauge-svg" viewBox="0 0 120 120">
+                                        <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                        <circle class="gauge-progress" id="gaugeProgressCircle" cx="60" cy="60" r="50" style="stroke-dashoffset: 49.7;"></circle>
+                                    </svg>
+                                    <div class="gauge-inner-text">
+                                        <span class="gauge-percentage-number" id="confidenceScoreText">84.18%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Aligned Metrics List -->
+                                <div class="metrics-stack-list">
+                                    <div class="metric-row-item">
+                                        <div class="metric-icon-box box-teal">
+                                            <i data-lucide="image"></i>
+                                        </div>
+                                        <span class="metric-item-name">Preprocessing</span>
+                                        <span class="metric-item-val" id="metricPrep">364.6 ms</span>
+                                    </div>
+
+                                    <div class="metric-row-item">
+                                        <div class="metric-icon-box box-red">
+                                            <i data-lucide="cpu"></i>
+                                        </div>
+                                        <span class="metric-item-name">Model Inference</span>
+                                        <span class="metric-item-val" id="metricInfer">13697.28 ms</span>
+                                    </div>
+
+                                    <div class="metric-row-item">
+                                        <div class="metric-icon-box box-purple">
+                                            <i data-lucide="arrow-down-circle"></i>
+                                        </div>
+                                        <span class="metric-item-name">Total Latency</span>
+                                        <span class="metric-item-val" id="metricTotal">14560.54 ms</span>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
-                        <!-- Total Latency -->
-                        <div class="metric-glass-card">
-                            <div class="metric-stat-icon icon-cyan">
+                    </div>
+
+                    <!-- Computer Vision Pipeline: 4 Equal Cards in 1 Row (Matches Reference) -->
+                    <div class="cv-pipeline-block" id="pipeline-section">
+                        <div class="cv-pipeline-header">
+                            <div class="pipeline-header-icon">
+                                <i data-lucide="settings"></i>
+                            </div>
+                            <div class="pipeline-header-text">
+                                <h4>Computer Vision Pipeline</h4>
+                                <p>Visual representation of image preprocessing steps</p>
+                            </div>
+                        </div>
+
+                        <div class="cv-steps-flex-row" id="pipelineContainer">
+                            
+                            <!-- Step 1: Original Image -->
+                            <div class="cv-step-card">
+                                <div class="cv-step-card-header">
+                                    <i data-lucide="image" class="step-icon-blue"></i>
+                                    <h5>1. Original Image</h5>
+                                </div>
+                                <div class="cv-step-image-wrap">
+                                    <div class="mini-lined-note" id="placeholderStep1">
+                                        <p class="mini-note-p">Code is like humor.</p>
+                                        <p class="mini-note-p">When you have to</p>
+                                        <p class="mini-note-p">explain it, it's bad.</p>
+                                        <p class="mini-note-author">- Cory House</p>
+                                    </div>
+                                    <img id="visOriginal" src="" alt="Original Image" class="cv-step-real-img hidden">
+                                </div>
+                                <span class="cv-step-caption">Input handwritten text</span>
+                            </div>
+
+                            <div class="cv-arrow-connector">
+                                <i data-lucide="arrow-right"></i>
+                            </div>
+
+                            <!-- Step 2: Perspective Transform -->
+                            <div class="cv-step-card">
+                                <div class="cv-step-card-header">
+                                    <i data-lucide="scan" class="step-icon-green"></i>
+                                    <h5>2. Perspective Transform</h5>
+                                </div>
+                                <div class="cv-step-image-wrap">
+                                    <div class="mini-lined-note skew-corrected" id="placeholderStep2">
+                                        <p class="mini-note-p">Code is like humor.</p>
+                                        <p class="mini-note-p">When you have to</p>
+                                        <p class="mini-note-p">explain it, it's bad.</p>
+                                        <p class="mini-note-author">- Cory House</p>
+                                    </div>
+                                    <img id="visPerspective" src="" alt="Perspective Transform" class="cv-step-real-img hidden">
+                                </div>
+                                <span class="cv-step-caption">Corrects image distortion</span>
+                            </div>
+
+                            <div class="cv-arrow-connector">
+                                <i data-lucide="arrow-right"></i>
+                            </div>
+
+                            <!-- Step 3: CLAHE + Thresholding -->
+                            <div class="cv-step-card">
+                                <div class="cv-step-card-header">
+                                    <i data-lucide="sliders" class="step-icon-blue"></i>
+                                    <h5>3. CLAHE + Thresholding</h5>
+                                </div>
+                                <div class="cv-step-image-wrap">
+                                    <div class="mini-lined-note binarized-note" id="placeholderStep3">
+                                        <p class="mini-note-p bold-ink">Code is like humor.</p>
+                                        <p class="mini-note-p bold-ink">When you have to</p>
+                                        <p class="mini-note-p bold-ink">explain it, it's bad.</p>
+                                        <p class="mini-note-author bold-ink">- Cory House</p>
+                                    </div>
+                                    <img id="visClahe" src="" alt="CLAHE and Thresholding" class="cv-step-real-img hidden">
+                                </div>
+                                <span class="cv-step-caption">Enhances contrast and removes noise</span>
+                            </div>
+
+                            <div class="cv-arrow-connector">
+                                <i data-lucide="arrow-right"></i>
+                            </div>
+
+                            <!-- Step 4: Multi-Line Segments -->
+                            <div class="cv-step-card">
+                                <div class="cv-step-card-header">
+                                    <i data-lucide="split" class="step-icon-green"></i>
+                                    <h5>4. Multi-Line Segments</h5>
+                                </div>
+                                <div class="cv-step-image-wrap">
+                                    <div class="mini-lined-note segmented-note" id="placeholderStep4">
+                                        <div class="segmented-line-box box-line-green">
+                                            <span>Code is like humor.</span>
+                                        </div>
+                                        <div class="segmented-line-box box-line-pink">
+                                            <span>When you have to</span>
+                                        </div>
+                                        <div class="segmented-line-box box-line-blue">
+                                            <span>explain it, it's bad.</span>
+                                        </div>
+                                        <div class="segmented-line-box box-line-yellow">
+                                            <span>- Cory House</span>
+                                        </div>
+                                    </div>
+                                    <div class="lines-scroll-list" id="visLines"></div>
+                                </div>
+                                <span class="cv-step-caption">Detected text lines for recognition</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Session History Section: Full-Width Table (Matches Reference) -->
+        <section class="section-session-history" id="history-section">
+            <div class="main-container">
+                <div class="history-outer-card glass-card">
+                    
+                    <div class="history-card-header">
+                        <div class="history-title-group">
+                            <div class="history-header-icon">
                                 <i data-lucide="clock"></i>
                             </div>
-                            <div class="metric-stat-body">
-                                <span class="metric-label">Total Latency</span>
-                                <h4 class="metric-stat-val" id="metricTotal">-- ms</h4>
-                                <span class="metric-caption">Complete end-to-end response time</span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- Computer Vision Pipeline Visualizer Section -->
-        <section class="section-pipeline" id="pipeline-section">
-            <div class="main-container">
-                <div class="section-header text-center">
-                    <h2 class="section-title">Computer Vision Pipeline</h2>
-                    <p class="section-subtitle">Transparent four-step transformation pipeline turning raw handwriting into sequence-modeled text.</p>
-                </div>
-
-                <div class="pipeline-four-steps-grid" id="pipelineContainer">
-                    
-                    <!-- Step 1: Original Image -->
-                    <div class="pipeline-step-card glass-card">
-                        <div class="step-badge">Step 1</div>
-                        <h4 class="step-title">Original Image</h4>
-                        <div class="step-image-box">
-                            <img id="visOriginal" src="" alt="Original Upload" class="hidden">
-                            <div class="step-placeholder" id="placeholderStep1">
-                                <i data-lucide="image"></i>
-                                <span>Awaiting image</span>
-                            </div>
-                        </div>
-                        <p class="step-desc">Raw input scan or photo in native dimensions and resolution.</p>
-                    </div>
-
-                    <div class="pipeline-connector-arrow">
-                        <i data-lucide="arrow-right"></i>
-                    </div>
-
-                    <!-- Step 2: Perspective Transform -->
-                    <div class="pipeline-step-card glass-card">
-                        <div class="step-badge">Step 2</div>
-                        <h4 class="step-title">Perspective Transform</h4>
-                        <div class="step-image-box">
-                            <img id="visPerspective" src="" alt="Perspective / Grayscale Normalization" class="hidden">
-                            <div class="step-placeholder" id="placeholderStep2">
-                                <i data-lucide="scan"></i>
-                                <span>Awaiting image</span>
-                            </div>
-                        </div>
-                        <p class="step-desc">Contrast normalization and skew-compensated document orientation.</p>
-                    </div>
-
-                    <div class="pipeline-connector-arrow">
-                        <i data-lucide="arrow-right"></i>
-                    </div>
-
-                    <!-- Step 3: CLAHE + Thresholding -->
-                    <div class="pipeline-step-card glass-card">
-                        <div class="step-badge">Step 3</div>
-                        <h4 class="step-title">CLAHE + Thresholding</h4>
-                        <div class="step-image-box">
-                            <img id="visClahe" src="" alt="CLAHE Adaptive Thresholding" class="hidden">
-                            <div class="step-placeholder" id="placeholderStep3">
-                                <i data-lucide="sliders"></i>
-                                <span>Awaiting image</span>
-                            </div>
-                        </div>
-                        <p class="step-desc">Adaptive Gaussian thresholding isolating pen ink from paper noise.</p>
-                    </div>
-
-                    <div class="pipeline-connector-arrow">
-                        <i data-lucide="arrow-right"></i>
-                    </div>
-
-                    <!-- Step 4: Multi-Line Segments -->
-                    <div class="pipeline-step-card glass-card">
-                        <div class="step-badge">Step 4</div>
-                        <h4 class="step-title">Multi-Line Segments</h4>
-                        <div class="step-image-box step-lines-box" id="visLinesContainer">
-                            <div class="step-placeholder" id="placeholderStep4">
-                                <i data-lucide="split"></i>
-                                <span>Awaiting image</span>
-                            </div>
-                            <div class="lines-scroll-list" id="visLines"></div>
-                        </div>
-                        <p class="step-desc">Individual line and word-level slices padded to (32, 128) for the CNN.</p>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- Session History Section -->
-        <section class="section-history" id="history-section">
-            <div class="main-container">
-                <div class="glass-card history-dashboard">
-                    <div class="history-header-row">
-                        <div class="history-title-group">
-                            <div class="title-with-icon">
-                                <i data-lucide="history"></i>
+                            <div class="history-header-text">
                                 <h3>Session History</h3>
+                                <p>Your recent handwriting recognition results</p>
                             </div>
-                            <span class="history-count-pill" id="historyCount">0 entries</span>
                         </div>
-                        
-                        <button type="button" class="btn btn-secondary btn-sm" id="clearHistoryBtn" title="Clear complete history">
+
+                        <button type="button" class="btn btn-clear-history" id="clearHistoryBtn">
                             <i data-lucide="trash-2"></i>
                             <span>Clear History</span>
                         </button>
                     </div>
 
-                    <!-- Table Responsive Container -->
+                    <!-- Full-Width Responsive Table -->
                     <div class="table-responsive-wrapper">
-                        <table class="history-table" id="historyTable">
+                        <table class="session-history-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">#</th>
-                                    <th style="width: 90px;">Preview</th>
+                                    <th style="width: 55px;">#</th>
+                                    <th style="width: 140px;">Image Preview</th>
                                     <th>Recognized Text</th>
-                                    <th style="width: 120px;">Confidence</th>
-                                    <th style="width: 110px;">Total Latency</th>
-                                    <th style="width: 110px;">Timestamp</th>
-                                    <th style="width: 110px; text-align: center;">Actions</th>
+                                    <th style="width: 130px;">Confidence</th>
+                                    <th style="width: 140px;">Processing Time</th>
+                                    <th style="width: 170px;">Timestamp</th>
+                                    <th style="width: 110px; text-align: center;">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTableBody">
-                                <tr class="empty-table-row" id="emptyHistoryRow">
-                                    <td colspan="7" class="empty-table-cell">
-                                        <div class="empty-history-box">
-                                            <i data-lucide="inbox"></i>
-                                            <span>No recognition history recorded in this session.</span>
+                                <!-- Default sample row from reference design -->
+                                <tr class="history-row-item">
+                                    <td class="col-num">1</td>
+                                    <td>
+                                        <div class="history-thumb-wrap">
+                                            <div class="thumb-mini-note">
+                                                <span>Code is like humor...</span>
+                                            </div>
                                         </div>
+                                    </td>
+                                    <td class="history-text-col">
+                                        <span class="recognized-snippet" title="Code is like humor. When you have to explain it, it's bad. - Cory House">
+                                            Code is like humor. When you have to...
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="confidence-pill pill-high">84.18%</span>
+                                    </td>
+                                    <td class="metric-time-col">14.56 s</td>
+                                    <td class="metric-date-col">Oct 10, 2025 10:12 PM</td>
+                                    <td class="actions-col">
+                                        <button type="button" class="btn-table-action" title="Copy text" id="sampleRowCopy">
+                                            <i data-lucide="copy"></i>
+                                        </button>
+                                        <button type="button" class="btn-table-action btn-table-del" title="Delete record" id="sampleRowDel">
+                                            <i data-lucide="trash-2"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+
                 </div>
             </div>
         </section>
 
-        <!-- How It Works Section -->
-        <section class="section-info" id="how-it-works">
-            <div class="main-container">
-                <div class="section-header text-center">
-                    <h2 class="section-title">How NeuralText Works</h2>
-                    <p class="section-subtitle">Engineered with hybrid computer vision and recurrent neural networks for resilient handwriting recognition.</p>
-                </div>
-
-                <div class="info-cards-grid">
-                    <div class="info-card glass-card">
-                        <div class="info-icon"><i data-lucide="scan-line"></i></div>
-                        <h3>1. Adaptive Slicing</h3>
-                        <p>OpenCV adaptive Gaussian thresholding and horizontal line projection group continuous handwriting into individual word slices while filtering out lined-paper ruling and noise.</p>
-                    </div>
-                    <div class="info-card glass-card">
-                        <div class="info-icon"><i data-lucide="binary"></i></div>
-                        <h3>2. Deep CNN Features</h3>
-                        <p>A multi-stage 2D Convolutional network with Batch Normalization extracts 256-dimensional spatial handwriting stroke features, maintaining aspect ratios across varied handwriting styles.</p>
-                    </div>
-                    <div class="info-card glass-card">
-                        <div class="info-icon"><i data-lucide="git-merge"></i></div>
-                        <h3>3. Bidirectional LSTM</h3>
-                        <p>Two stacked Bidirectional LSTM layers process the temporal sequence forward and backward simultaneously, decoding context across 32 time steps.</p>
-                    </div>
-                    <div class="info-card glass-card">
-                        <div class="info-icon"><i data-lucide="check-check"></i></div>
-                        <h3>4. CTC Greedy Decoding</h3>
-                        <p>Connectionist Temporal Classification loss and decoding resolve unsegmented character tokens, collapsing repeated characters and eliminating blank tokens without manual alignment.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About & Architecture Section -->
+        <!-- About & Details Section -->
         <section class="section-about" id="about">
             <div class="main-container">
                 <div class="about-grid glass-card">
                     <div class="about-col">
                         <div class="title-with-icon">
-                            <i data-lucide="database"></i>
-                            <h3>Training Corpus & Benchmarks</h3>
+                            <i data-lucide="cpu"></i>
+                            <h3>Convolutional &amp; Recurrent Architecture</h3>
                         </div>
-                        <p>Trained and validated on the internationally recognized <strong>IAM Handwriting Database</strong> across 35,650 verified words and phrases. Evaluated on genuine unseen handwriting samples measuring Character Error Rate (CER) and Word Error Rate (WER).</p>
+                        <p>Powered by a 7-layer Convolutional feature extractor with Batch Normalization, coupled to stacked Bidirectional LSTM sequence modeling with CTC greedy decoding.</p>
                     </div>
                     <div class="about-col">
                         <div class="title-with-icon">
-                            <i data-lucide="server"></i>
-                            <h3>Production Architecture</h3>
+                            <i data-lucide="shield-check"></i>
+                            <h3>Production &amp; Privacy Safeguards</h3>
                         </div>
-                        <p>Powered by TensorFlow XLA runtime, Flask REST API, OpenCV Headless, and Gunicorn WSGI. Optimized with single-process memory management designed for cloud server limits.</p>
+                        <p>In-memory tensor processing runs purely locally or within isolated container instances. Uploaded temporary files are cleaned immediately upon inference completion.</p>
                     </div>
                 </div>
             </div>
@@ -502,67 +539,25 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="site-footer">
+    <!-- Footer Consistent Across All Views -->
+    <footer class="site-footer" id="contact">
         <div class="main-container footer-container">
-            <div class="footer-top">
-                <div class="footer-brand-col">
-                    <div class="nav-brand">
-                        <div class="brand-logo-icon">
-                            <i data-lucide="brain-circuit"></i>
-                        </div>
-                        <div class="brand-text-group">
-                            <span class="brand-title">NeuralText</span>
-                            <span class="brand-subtitle">Using Deep Learning</span>
-                        </div>
+            <div class="footer-bottom-row">
+                <div class="footer-brand-info">
+                    <div class="brand-logo-icon mini">
+                        <i data-lucide="brain"></i>
                     </div>
-                    <p class="footer-bio">An advanced Handwritten Text Recognition platform powered by Deep Convolutional and Recurrent Neural Networks.</p>
+                    <span>Handwritten Text Recognition Using Deep Learning &copy; 2026. All rights reserved.</span>
                 </div>
-
-                <div class="footer-links-col">
-                    <h4 class="footer-heading">Platform</h4>
-                    <ul class="footer-links-list">
-                        <li><a href="#hero">Home</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#upload-section">Recognition Studio</a></li>
-                        <li><a href="#pipeline-section">CV Pipeline</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-links-col">
-                    <h4 class="footer-heading">Resources</h4>
-                    <ul class="footer-links-list">
-                        <li><a href="/api/docs" target="_blank">API Documentation</a></li>
-                        <li><a href="/health" target="_blank">System Health</a></li>
-                        <li><a href="#about">Architecture</a></li>
-                        <li><a href="#history-section">Session Archive</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-links-col">
-                    <h4 class="footer-heading">Technical Stack</h4>
-                    <div class="footer-tags">
-                        <span class="tech-tag">TensorFlow</span>
-                        <span class="tech-tag">Keras</span>
-                        <span class="tech-tag">OpenCV</span>
-                        <span class="tech-tag">Flask</span>
-                        <span class="tech-tag">Gunicorn</span>
-                        <span class="tech-tag">CTC Loss</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2026 NeuralText | Handwritten Text Recognition Using Deep Learning. Production Deployment.</p>
-                <div class="footer-system-status">
+                <div class="footer-status-pill">
                     <span class="status-indicator"></span>
-                    <span>Systems Operational</span>
+                    <span>Systems Operational &amp; Ready</span>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- Client Scripts -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {

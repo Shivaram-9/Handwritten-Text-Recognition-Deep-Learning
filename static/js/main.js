@@ -1,6 +1,6 @@
 /**
  * NeuralText — AI Handwritten Text Recognition Platform
- * Interactive Client Controller & Background Canvas Animation
+ * Interactive Client Controller & Particle Flow Background Canvas
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,14 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 2. DOM Elements Selection ---
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
-    const uploadContent = document.getElementById('uploadContent');
-    const browseBtn = document.getElementById('browseBtn');
+    const chooseImageBtn = document.getElementById('chooseImageBtn');
+    const browseLink = document.getElementById('browseLink');
     
     // Preview Controls
-    const previewEmptyState = document.getElementById('previewEmptyState');
-    const previewContainer = document.getElementById('previewContainer');
+    const previewArea = document.getElementById('previewArea');
+    const previewDefaultNote = document.getElementById('previewDefaultNote');
     const imagePreview = document.getElementById('imagePreview');
-    const replaceBtn = document.getElementById('replaceBtn');
     const removeBtn = document.getElementById('removeBtn');
     const recognizeBtn = document.getElementById('recognizeBtn');
 
@@ -32,13 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultSection = document.getElementById('resultSection');
     const recognizedText = document.getElementById('recognizedText');
     const confidenceScoreText = document.getElementById('confidenceScoreText');
-    const confidenceProgressBar = document.getElementById('confidenceProgressBar');
+    const gaugeProgressCircle = document.getElementById('gaugeProgressCircle');
     const metricPrep = document.getElementById('metricPrep');
     const metricInfer = document.getElementById('metricInfer');
     const metricTotal = document.getElementById('metricTotal');
 
     // Result Actions
     const copyBtn = document.getElementById('copyBtn');
+    const inlineCopyBtn = document.getElementById('inlineCopyBtn');
     const downloadBtn = document.getElementById('downloadBtn');
     const clearBtn = document.getElementById('clearBtn');
 
@@ -53,10 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeholderStep4 = document.getElementById('placeholderStep4');
 
     // Session History Elements
-    const historyCount = document.getElementById('historyCount');
     const historyTableBody = document.getElementById('historyTableBody');
-    const emptyHistoryRow = document.getElementById('emptyHistoryRow');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const sampleRowCopy = document.getElementById('sampleRowCopy');
+    const sampleRowDel = document.getElementById('sampleRowDel');
 
     // Theme Switcher & Mobile Nav
     const themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -97,13 +97,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mobile nav toggle
     if (mobileMenuBtn && navMenu) {
         mobileMenuBtn.addEventListener('click', () => {
-            navMenu.classList.toggle('nav-menu-open');
+            navMenu.style.display = navMenu.style.display === 'flex' ? 'none' : 'flex';
         });
     }
 
-    // --- 4. Drag & Drop File Handling ---
-    if (browseBtn) {
-        browseBtn.addEventListener('click', (e) => {
+    // --- 4. File Selection & Drag & Drop Handling ---
+    if (chooseImageBtn) {
+        chooseImageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+    }
+
+    if (browseLink) {
+        browseLink.addEventListener('click', (e) => {
             e.stopPropagation();
             fileInput.click();
         });
@@ -111,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dropZone) {
         dropZone.addEventListener('click', (e) => {
-            if (e.target !== browseBtn) {
+            if (e.target !== chooseImageBtn && e.target !== browseLink) {
                 fileInput.click();
             }
         });
@@ -169,21 +176,13 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = (e) => {
             currentDataUrl = e.target.result;
             imagePreview.src = currentDataUrl;
+            imagePreview.classList.remove('hidden');
             
-            // Show preview, hide placeholder
-            previewEmptyState.classList.add('hidden');
-            previewContainer.classList.remove('hidden');
-            recognizeBtn.disabled = false;
+            // Hide sample handwriting lines inside the sticky note
+            const textLines = document.querySelector('.paper-content-lines');
+            if (textLines) textLines.classList.add('hidden');
         };
         reader.readAsDataURL(file);
-    }
-
-    // Replace / Remove buttons
-    if (replaceBtn) {
-        replaceBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            fileInput.click();
-        });
     }
 
     if (removeBtn) {
@@ -198,9 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDataUrl = null;
         fileInput.value = '';
         imagePreview.src = '';
-        previewContainer.classList.add('hidden');
-        previewEmptyState.classList.remove('hidden');
-        recognizeBtn.disabled = true;
+        imagePreview.classList.add('hidden');
+        const textLines = document.querySelector('.paper-content-lines');
+        if (textLines) textLines.classList.remove('hidden');
     }
 
     // --- 5. Run AI Model Execution ---
@@ -210,15 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function runInference() {
         if (!currentFile) {
-            showError('Please upload a handwriting image first.');
+            showError('Please upload a handwriting image first or use the sample.');
             return;
         }
 
-        // UI state: loading
         hideError();
         recognizeBtn.disabled = true;
         loadingState.classList.remove('hidden');
-        loadingStatusText.textContent = 'Preprocessing image & binarizing strokes...';
+        loadingStatusText.textContent = 'Preprocessing image & normalizing contrast...';
 
         const stages = [
             'Normalizing contrast & skew angle...',
@@ -253,47 +251,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Display results smoothly
             renderPredictionResults(data);
 
-            // Record into session history
+            // Add to session history table
             addToHistory({
                 thumb: currentDataUrl,
                 text: data.recognized_text || '',
                 confidence: data.confidence !== undefined ? data.confidence : 0,
                 latency: data.latency && data.latency.total_ms ? data.latency.total_ms : 0,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
-            // Smooth scroll down to result card
             resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
         } catch (err) {
             clearInterval(progressTimer);
             loadingState.classList.add('hidden');
             recognizeBtn.disabled = false;
-            showError('Network connectivity error. Please ensure the server is running.');
+            showError('Network connectivity error. Please ensure the backend is running.');
             console.error('Inference error:', err);
         }
     }
 
-    // --- 6. Render Prediction & Pipeline Visualizer ---
+    // --- 6. Render Prediction Results & Update Radial Gauge ---
     function renderPredictionResults(data) {
         resultSection.classList.remove('hidden');
 
-        // Text & Confidence
+        // Update transcription text
         recognizedText.textContent = data.recognized_text || '(No text detected)';
+        
+        // Update confidence
         const conf = typeof data.confidence === 'number' ? data.confidence : 0;
-        confidenceScoreText.textContent = `${conf.toFixed(1)}%`;
-        confidenceProgressBar.style.width = `${Math.min(100, Math.max(0, conf))}%`;
+        confidenceScoreText.textContent = `${conf.toFixed(2)}%`;
 
-        // Color gauge based on confidence
-        if (conf >= 80) {
-            confidenceProgressBar.style.background = 'linear-gradient(90deg, #10b981, #06b6d4)';
-        } else if (conf >= 55) {
-            confidenceProgressBar.style.background = 'linear-gradient(90deg, #f59e0b, #10b981)';
-        } else {
-            confidenceProgressBar.style.background = 'linear-gradient(90deg, #ef4444, #f59e0b)';
+        // Update SVG radial circle (perimeter = 2 * PI * 50 ~= 314.15)
+        if (gaugeProgressCircle) {
+            const circumference = 314.15;
+            const offset = circumference - (conf / 100) * circumference;
+            gaugeProgressCircle.style.strokeDashoffset = offset;
         }
 
         // Latencies
@@ -303,10 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
             metricTotal.textContent = `${data.latency.total_ms || 0} ms`;
         }
 
-        // Render 4-step Pipeline Visualizer
+        // Render 4-step Pipeline Images
         const imgs = data.pipeline_images || {};
 
-        // Step 1: Original
         if (imgs.original) {
             visOriginal.src = `data:image/jpeg;base64,${imgs.original}`;
             visOriginal.classList.remove('hidden');
@@ -317,7 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
             placeholderStep1.classList.add('hidden');
         }
 
-        // Step 2: Perspective / Normalization
         if (imgs.perspective) {
             visPerspective.src = `data:image/jpeg;base64,${imgs.perspective}`;
             visPerspective.classList.remove('hidden');
@@ -328,7 +321,6 @@ document.addEventListener('DOMContentLoaded', () => {
             placeholderStep2.classList.add('hidden');
         }
 
-        // Step 3: CLAHE & Adaptive Thresholding
         if (imgs.clahe_thresh) {
             visClahe.src = `data:image/jpeg;base64,${imgs.clahe_thresh}`;
             visClahe.classList.remove('hidden');
@@ -339,7 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
             placeholderStep3.classList.add('hidden');
         }
 
-        // Step 4: Multi-line Segments
         visLines.innerHTML = '';
         if (Array.isArray(imgs.lines) && imgs.lines.length > 0) {
             placeholderStep4.classList.add('hidden');
@@ -347,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lineImg = document.createElement('img');
                 lineImg.src = `data:image/jpeg;base64,${b64}`;
                 lineImg.alt = `Segment ${idx + 1}`;
-                lineImg.className = 'pipeline-line-crop';
+                lineImg.className = 'cv-step-real-img';
                 visLines.appendChild(lineImg);
             });
         } else {
@@ -357,18 +348,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
     }
 
-    // --- 7. Result Action Buttons ---
-    if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
+    // --- 7. Result Action Handlers ---
+    function setupCopy(btnElement) {
+        if (!btnElement) return;
+        btnElement.addEventListener('click', () => {
             const text = recognizedText.textContent;
-            if (!text || text === 'Waiting for input...') return;
+            if (!text) return;
 
             navigator.clipboard.writeText(text).then(() => {
-                const originalText = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i data-lucide="check"></i><span>Copied!</span>';
+                const originalHtml = btnElement.innerHTML;
+                btnElement.innerHTML = '<i data-lucide="check"></i><span>Copied!</span>';
                 if (window.lucide) lucide.createIcons();
                 setTimeout(() => {
-                    copyBtn.innerHTML = originalText;
+                    btnElement.innerHTML = originalHtml;
                     if (window.lucide) lucide.createIcons();
                 }, 1800);
             }).catch(() => {
@@ -377,10 +369,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    setupCopy(copyBtn);
+    setupCopy(inlineCopyBtn);
+
     if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
             const text = recognizedText.textContent;
-            if (!text || text === 'Waiting for input...') return;
+            if (!text) return;
 
             const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
@@ -396,86 +391,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
-            resultSection.classList.add('hidden');
-            recognizedText.textContent = 'Waiting for input...';
-            confidenceScoreText.textContent = '0.0%';
-            confidenceProgressBar.style.width = '0%';
-            metricPrep.textContent = '-- ms';
-            metricInfer.textContent = '-- ms';
-            metricTotal.textContent = '-- ms';
-            resetPipelinePlaceholders();
+            recognizedText.textContent = '';
+            confidenceScoreText.textContent = '0.00%';
+            if (gaugeProgressCircle) gaugeProgressCircle.style.strokeDashoffset = 314.15;
+            metricPrep.textContent = '0 ms';
+            metricInfer.textContent = '0 ms';
+            metricTotal.textContent = '0 ms';
         });
     }
 
-    function resetPipelinePlaceholders() {
-        visOriginal.classList.add('hidden');
-        visPerspective.classList.add('hidden');
-        visClahe.classList.add('hidden');
-        placeholderStep1.classList.remove('hidden');
-        placeholderStep2.classList.remove('hidden');
-        placeholderStep3.classList.remove('hidden');
-        placeholderStep4.classList.remove('hidden');
-        visLines.innerHTML = '';
+    // Sample row handlers from template
+    if (sampleRowCopy) {
+        sampleRowCopy.addEventListener('click', () => {
+            navigator.clipboard.writeText("Code is like humor. When you have to explain it, it's bad. - Cory House");
+        });
+    }
+    if (sampleRowDel) {
+        sampleRowDel.addEventListener('click', function() {
+            const row = this.closest('tr');
+            if (row) row.remove();
+        });
     }
 
-    // --- 8. Session History Table ---
+    // --- 8. Session History Table Management ---
     function addToHistory(item) {
         sessionHistory.unshift(item);
-        if (sessionHistory.length > 20) sessionHistory.pop();
+        if (sessionHistory.length > 15) sessionHistory.pop();
         renderHistoryTable();
     }
 
     function renderHistoryTable() {
         if (!historyTableBody) return;
 
-        if (sessionHistory.length === 0) {
-            historyTableBody.innerHTML = `
-                <tr class="empty-table-row" id="emptyHistoryRow">
-                    <td colspan="7" class="empty-table-cell">
-                        <div class="empty-history-box">
-                            <i data-lucide="inbox"></i>
-                            <span>No recognition history recorded in this session.</span>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            if (historyCount) historyCount.textContent = '0 entries';
-            if (window.lucide) lucide.createIcons();
-            return;
-        }
-
-        if (historyCount) {
-            historyCount.textContent = `${sessionHistory.length} ${sessionHistory.length === 1 ? 'entry' : 'entries'}`;
-        }
-
         historyTableBody.innerHTML = '';
         sessionHistory.forEach((entry, idx) => {
             const tr = document.createElement('tr');
+            tr.className = 'history-row-item';
             
             const confClass = entry.confidence >= 80 ? 'pill-high' : entry.confidence >= 55 ? 'pill-mid' : 'pill-low';
+            const latencySec = (entry.latency / 1000).toFixed(2);
+            const previewHtml = entry.thumb 
+                ? `<img src="${entry.thumb}" alt="Thumb" class="history-thumb-img">`
+                : `<div class="thumb-mini-note"><span>${escapeHtml(entry.text.substring(0, 15))}...</span></div>`;
 
             tr.innerHTML = `
-                <td style="font-weight: 600; color: var(--text-muted);">${idx + 1}</td>
+                <td class="col-num">${idx + 1}</td>
                 <td>
-                    <img src="${entry.thumb}" alt="Thumb" class="history-thumb-img">
+                    <div class="history-thumb-wrap">
+                        ${previewHtml}
+                    </div>
                 </td>
-                <td class="history-text-cell" title="${escapeHtml(entry.text)}">
-                    ${escapeHtml(entry.text)}
+                <td class="history-text-col">
+                    <span class="recognized-snippet" title="${escapeHtml(entry.text)}">
+                        ${escapeHtml(entry.text.length > 40 ? entry.text.substring(0, 40) + '...' : entry.text)}
+                    </span>
                 </td>
                 <td>
-                    <span class="confidence-pill ${confClass}">${entry.confidence.toFixed(1)}%</span>
+                    <span class="confidence-pill ${confClass}">${entry.confidence.toFixed(2)}%</span>
                 </td>
-                <td style="color: var(--text-muted); font-size: 0.85rem;">
-                    ${entry.latency} ms
-                </td>
-                <td style="color: var(--text-muted); font-size: 0.85rem;">
-                    ${entry.timestamp}
-                </td>
-                <td style="text-align: center;">
-                    <button class="btn btn-secondary btn-icon-only copy-history-btn" data-index="${idx}" title="Copy Text">
+                <td class="metric-time-col">${latencySec} s</td>
+                <td class="metric-date-col">${entry.timestamp}</td>
+                <td class="actions-col">
+                    <button type="button" class="btn-table-action copy-dyn-btn" data-index="${idx}" title="Copy Text">
                         <i data-lucide="copy"></i>
                     </button>
-                    <button class="btn btn-secondary btn-icon-only delete-history-btn" data-index="${idx}" title="Delete Record">
+                    <button type="button" class="btn-table-action btn-table-del del-dyn-btn" data-index="${idx}" title="Delete Record">
                         <i data-lucide="trash-2"></i>
                     </button>
                 </td>
@@ -483,25 +463,15 @@ document.addEventListener('DOMContentLoaded', () => {
             historyTableBody.appendChild(tr);
         });
 
-        // Wire copy and delete events
-        document.querySelectorAll('.copy-history-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.copy-dyn-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
                 const i = parseInt(btn.getAttribute('data-index'), 10);
                 const rec = sessionHistory[i];
-                if (rec) {
-                    navigator.clipboard.writeText(rec.text).then(() => {
-                        btn.innerHTML = '<i data-lucide="check"></i>';
-                        if (window.lucide) lucide.createIcons();
-                        setTimeout(() => {
-                            btn.innerHTML = '<i data-lucide="copy"></i>';
-                            if (window.lucide) lucide.createIcons();
-                        }, 1200);
-                    });
-                }
+                if (rec) navigator.clipboard.writeText(rec.text);
             });
         });
 
-        document.querySelectorAll('.delete-history-btn').forEach(btn => {
+        document.querySelectorAll('.del-dyn-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const i = parseInt(btn.getAttribute('data-index'), 10);
                 sessionHistory.splice(i, 1);
@@ -514,10 +484,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (clearHistoryBtn) {
         clearHistoryBtn.addEventListener('click', () => {
-            if (sessionHistory.length === 0) return;
             if (confirm('Clear all session history records?')) {
                 sessionHistory = [];
-                renderHistoryTable();
+                historyTableBody.innerHTML = '';
             }
         });
     }
@@ -546,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorCloseBtn.addEventListener('click', hideError);
     }
 
-    // --- 10. Neural Network Interactive Canvas ---
+    // --- 10. Futuristic Animated Neural Canvas ---
     function initNeuralCanvas() {
         const canvas = document.getElementById('neuralCanvas');
         if (!canvas) return;
@@ -566,8 +535,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.addEventListener('resize', resize);
 
-        const particleCount = Math.min(65, Math.max(25, Math.floor(window.innerWidth / 30)));
-        const maxDist = 130;
+        const particleCount = Math.min(75, Math.max(30, Math.floor(window.innerWidth / 28)));
+        const maxDist = 140;
 
         function buildParticles() {
             particles = [];
@@ -575,10 +544,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 particles.push({
                     x: Math.random() * width,
                     y: Math.random() * height,
-                    vx: (Math.random() - 0.5) * 0.45,
-                    vy: (Math.random() - 0.5) * 0.45,
-                    radius: Math.random() * 1.8 + 0.8,
-                    baseAlpha: Math.random() * 0.4 + 0.2
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    radius: Math.random() * 2.0 + 0.9,
+                    baseAlpha: Math.random() * 0.45 + 0.25
                 });
             }
         }
@@ -588,7 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
         function step() {
             ctx.clearRect(0, 0, width, height);
 
-            // Connect neighboring particles
             for (let i = 0; i < particles.length; i++) {
                 const p1 = particles[i];
                 p1.x += p1.vx;
@@ -599,7 +567,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (p1.y < 0) p1.y = height;
                 if (p1.y > height) p1.y = 0;
 
-                // Draw node
                 ctx.beginPath();
                 ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(0, 229, 255, ${p1.baseAlpha})`;
@@ -612,12 +579,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist < maxDist) {
-                        const alpha = (1 - dist / maxDist) * 0.18;
+                        const alpha = (1 - dist / maxDist) * 0.22;
                         ctx.beginPath();
                         ctx.moveTo(p1.x, p1.y);
                         ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(0, 229, 255, ${alpha})`;
-                        ctx.lineWidth = 0.8;
+                        ctx.strokeStyle = `rgba(59, 130, 246, ${alpha})`;
+                        ctx.lineWidth = 0.9;
                         ctx.stroke();
                     }
                 }

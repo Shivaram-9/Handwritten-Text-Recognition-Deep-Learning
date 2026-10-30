@@ -99,11 +99,17 @@ class ImagePreprocessor:
             blurred = cv2.GaussianBlur(clahe_img, (5, 5), 0)
             thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 25, 10)
             
+            # Detect and subtract ruled notebook horizontal lines (width > 30px, height = 1px)
+            # This prevents notebook rulings or underlines from merging words together (especially Image 7)
+            horiz_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 1))
+            detected_rules = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horiz_kernel)
+            thresh = cv2.subtract(thresh, detected_rules)
+
             # Zero out outer borders to prevent border lines / page borders from becoming giant contours
-            thresh[:3, :] = 0
-            thresh[-3:, :] = 0
-            thresh[:, :3] = 0
-            thresh[:, -3:] = 0
+            thresh[:5, :] = 0
+            thresh[-5:, :] = 0
+            thresh[:, :5] = 0
+            thresh[:, -5:] = 0
             
             # Morphological opening to suppress stray noise specks
             kernel_open = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))

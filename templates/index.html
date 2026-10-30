@@ -56,13 +56,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#pipeline-section" class="nav-pill">
+                    <a href="#examples" class="nav-pill">
                         <i data-lucide="file-text"></i>
                         <span>Examples</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#contact" class="nav-pill">
+                    <a href="#contact-section" class="nav-pill">
                         <i data-lucide="mail"></i>
                         <span>Contact</span>
                     </a>
@@ -515,23 +515,163 @@ explain it, it's bad.
             </div>
         </section>
 
-        <!-- About & Details Section -->
+                <!-- About Section (Dedicated Content) -->
         <section class="section-about" id="about">
             <div class="main-container">
+                <div class="section-header text-center" style="margin-bottom: 24px;">
+                    <h2 class="section-title">About Handwritten Text Recognition</h2>
+                    <p class="section-subtitle">Bridging analog handwriting and digital text processing using state-of-the-art Deep Learning</p>
+                </div>
                 <div class="about-grid glass-card">
                     <div class="about-col">
                         <div class="title-with-icon">
-                            <i data-lucide="cpu"></i>
-                            <h3>Convolutional &amp; Recurrent Architecture</h3>
+                            <i data-lucide="book-open"></i>
+                            <h3>What is Handwritten Text Recognition?</h3>
                         </div>
-                        <p>Powered by a 7-layer Convolutional feature extractor with Batch Normalization, coupled to stacked Bidirectional LSTM sequence modeling with CTC greedy decoding.</p>
+                        <p>Handwritten Text Recognition (HTR) is the automated conversion of human handwriting from scanned documents, notes, and photos into machine-encoded editable text. Unlike standard OCR which handles rigid machine-printed fonts, HTR must accommodate organic stroke variations, irregular slants, overlapping ascenders/descenders, and individual writing idiosyncrasies.</p>
+                        
+                        <div class="title-with-icon" style="margin-top: 20px;">
+                            <i data-lucide="target"></i>
+                            <h3>Project Motivation & Objectives</h3>
+                        </div>
+                        <p>Developed as a comprehensive machine learning engineering project to demonstrate real-time, privacy-first handwriting transcription. Objectives include end-to-end automated document line slicing, sub-2-second inference latency, and high character-level fidelity on diverse handwriting styles.</p>
                     </div>
+
                     <div class="about-col">
                         <div class="title-with-icon">
-                            <i data-lucide="shield-check"></i>
-                            <h3>Production &amp; Privacy Safeguards</h3>
+                            <i data-lucide="layers"></i>
+                            <h3>Technology Stack</h3>
                         </div>
-                        <p>In-memory tensor processing runs purely locally or within isolated container instances. Uploaded temporary files are cleaned immediately upon inference completion.</p>
+                        <p>Built with an enterprise-grade open-source stack:</p>
+                        <ul style="list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; color: var(--text-secondary); font-size: 0.9rem;">
+                            <li><strong style="color: var(--primary-cyan);">Python 3.11 &amp; TensorFlow / Keras:</strong> Deep CNN feature extraction &amp; BiLSTM sequential modeling.</li>
+                            <li><strong style="color: var(--primary-cyan);">OpenCV (Headless):</strong> Adaptive Gaussian binarization, skew compensation &amp; horizontal rule subtraction.</li>
+                            <li><strong style="color: var(--primary-cyan);">CTC Loss &amp; Greedy Decoding:</strong> Connectionist Temporal Classification for unaligned text streams.</li>
+                            <li><strong style="color: var(--primary-cyan);">Flask REST API &amp; Gunicorn:</strong> Production WSGI serving within cloud resource boundaries.</li>
+                        </ul>
+
+                        <div class="title-with-icon" style="margin-top: 20px;">
+                            <i data-lucide="globe"></i>
+                            <h3>Real-World Applications</h3>
+                        </div>
+                        <p>Historical archive digitization, medical prescription transcription, legal document searchability, and automated student examination grading.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section (Visual Step-by-Step) -->
+        <section class="section-how-it-works" id="how-it-works" style="padding: 24px 0;">
+            <div class="main-container">
+                <div class="section-header text-center" style="margin-bottom: 24px;">
+                    <h2 class="section-title">How It Works</h2>
+                    <p class="section-subtitle">The 8-stage automated pipeline from raw handwriting image to digital text</p>
+                </div>
+                <div class="glass-card" style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">1. Image Upload</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">High-resolution input scan or mobile photo accepted in JPG, PNG, or WEBP.</p>
+                        </div>
+                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">2. Image Preprocessing</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Grayscale conversion, orientation skew check, and CLAHE contrast enhancement.</p>
+                        </div>
+                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">3. Noise &amp; Rule Removal</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Adaptive Gaussian thresholding and horizontal line suppression filter notebook rules.</p>
+                        </div>
+                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">4. Line &amp; Word Slicing</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Dynamic vertical overlap clustering extracts lines and pads words to (32, 128).</p>
+                        </div>
+                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">5. CNN Feature Extraction</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">7-layer 2D Convolutional network with Batch Normalization captures spatial strokes.</p>
+                        </div>
+                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">6. BiLSTM Sequence Learning</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Stacked Bidirectional LSTMs model forward and backward contextual character flows.</p>
+                        </div>
+                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">7. CTC Decoding</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Connectionist Temporal Classification collapses repetitive tokens and blanks.</p>
+                        </div>
+                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">8. Final Transcription</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Confidence-weighted post-processing formats multi-line text ready for export.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Examples Section (Nine Original Benchmark Samples) -->
+        <section class="section-examples" id="examples" style="padding: 24px 0;">
+            <div class="main-container">
+                <div class="section-header text-center" style="margin-bottom: 24px;">
+                    <h2 class="section-title">Original Handwriting Benchmark Samples</h2>
+                    <p class="section-subtitle">The nine original handwriting sample sentences evaluated on the model</p>
+                </div>
+                <div class="glass-card" style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 1 — Pangram</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">The quick brown fox jumps over the lazy dog. Handwritten text recognition using deep learning works well!</p>
+                        </div>
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 2 — Cursive Motivation</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">Believe in yourself and all that you are Know that there is something inside you that is greater than any obstacle</p>
+                        </div>
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 3 — Student Profile</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">My Name is Shiva I am a Computer Science student I Love building projects and solving problems</p>
+                        </div>
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 4 — Uppercase Block</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">SUCCESS IS NOT FINAL FAILURE IS NOT FATAL IT IS THE COURAGE TO CONTINUE THAT COUNTS.</p>
+                        </div>
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 5 — Reading Quote</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">learning never exhausts the mind. it only ignites your curiosity.</p>
+                        </div>
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 6 — Future Quote</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">The best way to predict your future is to create it keep going</p>
+                        </div>
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 7 — Lined Note</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">Code is like humor. When you have to explain it, it's bad. - Cory House</p>
+                        </div>
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 8 — Dream Big</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">Dream big. work hard stay focused and surround yourself with good people</p>
+                        </div>
+                        <div class="example-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
+                            <h5 style="color: var(--primary-cyan); margin-bottom: 6px;">Sample 9 — Discipline</h5>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">Discipline today leads to freedom tomorrow.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section (Dedicated Section with Copy & Mailto) -->
+        <section class="section-contact" id="contact-section" style="padding: 24px 0 48px 0;">
+            <div class="main-container">
+                <div class="glass-card" style="padding: 32px; text-align: center; max-width: 680px; margin: 0 auto;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: var(--primary-cyan);">
+                        <i data-lucide="mail" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #FFFFFF; margin-bottom: 8px;">Contact &amp; Inquiries</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">For technical inquiries, academic presentation details, or questions regarding this deep learning system:</p>
+                    
+                    <div style="display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; background: rgba(5, 12, 28, 0.6); padding: 10px 20px; border-radius: var(--radius-full); border: 1px solid rgba(0, 180, 255, 0.25);">
+                        <a href="mailto:ymvshiva1784@gmail.com" style="color: var(--primary-cyan); font-family: var(--font-mono); font-weight: 600; font-size: 0.95rem;">ymvshiva1784@gmail.com</a>
+                        <button type="button" class="btn btn-tool" id="copyEmailBtn" title="Copy email address" style="padding: 4px 10px; font-size: 0.75rem;">
+                            <i data-lucide="copy"></i>
+                            <span>Copy Email</span>
+                        </button>
                     </div>
                 </div>
             </div>

@@ -595,4 +595,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
         step();
     }
+
+    // --- 10. Navigation Links & Scrollspy & Copy Email ---
+    const copyEmailBtn = document.getElementById('copyEmailBtn');
+    if (copyEmailBtn) {
+        copyEmailBtn.addEventListener('click', async () => {
+            const email = 'ymvshiva1784@gmail.com';
+            try {
+                await navigator.clipboard.writeText(email);
+                const originalText = copyEmailBtn.innerHTML;
+                copyEmailBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                copyEmailBtn.style.borderColor = 'var(--neon-green)';
+                copyEmailBtn.style.color = 'var(--neon-green)';
+                setTimeout(() => {
+                    copyEmailBtn.innerHTML = originalText;
+                    copyEmailBtn.style.borderColor = '';
+                    copyEmailBtn.style.color = '';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy email:', err);
+            }
+        });
+    }
+
+    // Scrollspy for navigation active pill state
+    const navPills = document.querySelectorAll('.nav-pill');
+    const sections = ['hero', 'about', 'how-it-works', 'examples', 'contact-section'];
+
+    function updateActiveNav() {
+        const scrollPosition = window.scrollY + 200;
+        let currentSectionId = '';
+
+        for (const sectionId of sections) {
+            const el = document.getElementById(sectionId);
+            if (el) {
+                const top = el.offsetTop;
+                const height = el.offsetHeight;
+                if (scrollPosition >= top && scrollPosition < top + height) {
+                    currentSectionId = sectionId;
+                    break;
+                }
+            }
+        }
+
+        if (currentSectionId) {
+            navPills.forEach(pill => {
+                const href = pill.getAttribute('href');
+                if (href === `#${currentSectionId}`) {
+                    pill.classList.add('active');
+                } else {
+                    pill.classList.remove('active');
+                }
+            });
+        }
+    }
+
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+    updateActiveNav();
 });

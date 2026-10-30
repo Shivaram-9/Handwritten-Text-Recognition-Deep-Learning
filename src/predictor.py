@@ -64,6 +64,11 @@ class HTRPredictor:
         self.inference_model = self._load_model()
         self._predict_fn = self._build_predict_fn()
         
+        # Load Language Model for context-aware post-processing
+        from src.language_model import LanguageModel
+        iam_words_path = os.path.join(Config.DATA_DIR, 'raw', 'IAM', 'ascii', 'words.txt')
+        self.lm = LanguageModel(iam_words_path)
+        
     def _load_model(self):
         """Loads the HTR inference model."""
         logger.info("Initializing HTR Inference Architecture...")
@@ -81,24 +86,17 @@ class HTRPredictor:
                 return inference_model
             except Exception as e:
                 logger.warning(f"Failed to load standalone model: {e}. Falling back to weight loading.")
-        
-        # 2. Fallback: Instantiate the full model and load weights
+        logger.info(f"Loading trained weights from {self.model_path}...")
         htr = HTRModel(vocab_size=Config.VOCAB_SIZE)
         training_model = htr.get_training_model()
         inference_model = htr.get_inference_model()
         
-        if not os.path.exists(self.model_path):
-            logger.warning(f"Trained model weights not found at {self.model_path}.")
-            logger.warning("Predictor will return random predictions initialized by He-normal.")
-            return inference_model
-            
-        logger.info(f"Loading trained weights from {self.model_path}...")
         try:
             training_model.load_weights(self.model_path)
             logger.info("Weights loaded successfully.")
         except Exception as e:
-            logger.error(f"Error loading model weights: {e}")
-            raise
+            logger.error(f"Failed to load weights: {e}")
+            raise e
             
         return inference_model
         
@@ -162,14 +160,13 @@ class HTRPredictor:
                 "lines": b64_lines
             }
             
-            merged_text = []
-            total_conf = 0.0
-            inf_time = 0.0
-            dec_time = 0.0
-            
-            for line_tensor in segmented_lines:
-                img_batch = np.expand_dims(line_tensor, axis=-1)
-                img_batch = np.expand_dims(img_batch, axis=0)
+            flat_word_tensors = []
+            for line_tensors in segmented_lines:
+                flat_word_tensors.extend(line_tensors)
+                
+            if len(flat_word_tensors) > 0:
+                img_batch = np.array(flat_word_tensors)
+                img_batch = np.expand_dims(img_batch, axis=-1)
                 img_batch = img_batch / 255.0
                 input_tensor = tf.convert_to_tensor(img_batch, dtype=tf.float32)
                 
@@ -177,26 +174,50 @@ class HTRPredictor:
                     t_inf_start = time.perf_counter()
                     preds = self._predict_fn(input_tensor)
                     t_inf_end = time.perf_counter()
-                    inf_time += (t_inf_end - t_inf_start)
+                    inf_time = (t_inf_end - t_inf_start)
                     
                     t_dec_start = time.perf_counter()
                     results, confidences = HTRModel.decode_predictions(preds, self.char_map)
                     t_dec_end = time.perf_counter()
-                    dec_time += (t_dec_end - t_dec_start)
+                    dec_time = (t_dec_end - t_dec_start)
                     
-                    merged_text.append(results[0])
-                    total_conf += confidences[0]
                 except Exception as e:
-                    logger.error(f"Inference failed on segmented line: {e}")
-                    
+                    logger.error(f"Inference failed on batched words: {e}")
+                    results = [""] * len(flat_word_tensors)
+                    confidences = [0.0] * len(flat_word_tensors)
+                    inf_time = 0.0
+                    dec_time = 0.0
+            else:
+                results = []
+                confidences = []
+                inf_time = 0.0
+                dec_time = 0.0
+                
             timings['inference_ms'] = round(inf_time * 1000, 2)
             timings['decoding_ms'] = round(dec_time * 1000, 2)
             
-            final_text = " ".join(merged_text)
-            avg_conf = total_conf / len(segmented_lines) if len(segmented_lines) > 0 else 0.0
+            final_lines = []
+            word_idx = 0
+            for line_tensors in segmented_lines:
+                line_words = []
+                for _ in range(len(line_tensors)):
+                    if word_idx < len(results):
+                        line_words.append(results[word_idx])
+                    word_idx += 1
+                final_lines.append(" ".join(line_words))
+                
+            final_text = "\n".join(final_lines)
+            avg_conf = sum(confidences) / max(1, len(confidences))
             
-            logger.info(f"Multi-line Prediction: '{final_text}' | Confidence: {avg_conf:.4f} | Latency: {timings}")
-            return final_text, avg_conf, timings, pipeline_images
+            # Apply Context-Aware Post-Processing Spellchecker
+            t_lm_start = time.perf_counter()
+            corrected_text = self.lm.correct_sentence(final_text, avg_conf)
+            t_lm_end = time.perf_counter()
+            timings['lm_correction_ms'] = round((t_lm_end - t_lm_start) * 1000, 2)
+            
+            logger.info(f"Raw Output:\n{final_text}")
+            logger.info(f"Multi-line Prediction:\n{corrected_text}\nConfidence: {avg_conf:.4f} | Latency: {timings}")
+            return corrected_text, avg_conf, timings, pipeline_images
             
         else:
             # 2. Fallback to Single Image Preprocessing
@@ -228,8 +249,15 @@ class HTRPredictor:
                 predicted_text = results[0]
                 confidence_score = confidences[0]
                 
-                logger.info(f"Fallback Prediction: '{predicted_text}' | Confidence: {confidence_score:.4f} | Latency: {timings}")
-                return predicted_text, confidence_score, timings, None
+                # Apply Context-Aware Post-Processing Spellchecker
+                t_lm_start = time.perf_counter()
+                corrected_text = self.lm.correct_sentence(predicted_text, confidence_score)
+                t_lm_end = time.perf_counter()
+                timings['lm_correction_ms'] = round((t_lm_end - t_lm_start) * 1000, 2)
+                
+                logger.info(f"Fallback Raw Output: '{predicted_text}'")
+                logger.info(f"Fallback Prediction: '{corrected_text}' | Confidence: {confidence_score:.4f} | Latency: {timings}")
+                return corrected_text, confidence_score, timings, None
                 
             except Exception as e:
                 logger.error(f"Inference failed during fallback network execution: {e}")

@@ -58,7 +58,7 @@ class ImagePreprocessor:
         resized = cv2.resize(thresh, (new_w, new_h), interpolation=cv2.INTER_AREA)
         
         final_img = np.zeros((target_h, target_w), dtype=np.uint8)
-        start_x = (target_w - new_w) // 2
+        start_x = 0
         start_y = (target_h - new_h) // 2
         final_img[start_y:start_y+new_h, start_x:start_x+new_w] = resized
         return final_img
@@ -88,20 +88,24 @@ class ImagePreprocessor:
                 
             h, w = gray.shape
             
-            # 4. Dynamic Bounding Box Thresholding
-            block = max(11, (h // 50) | 1)
-            if block % 2 == 0: block += 1
-            
+            # 4. Dynamic Bounding Box Thresholding & Border Cleaning
             blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-            thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, block, 2)
+            thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 25, 10)
             
-            b64_prep = img_to_b64(255 - thresh) # Display the normalized background version to frontend
+            # Zero out outer borders to prevent border lines / page borders from becoming giant contours
+            thresh[:3, :] = 0
+            thresh[-3:, :] = 0
+            thresh[:, :3] = 0
+            thresh[:, -3:] = 0
+            
+            # Morphological opening to suppress stray noise specks
+            kernel_open = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+            cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel_open)
+            
+            b64_prep = img_to_b64(255 - cleaned) # Display the normalized background version to frontend
 
-            # 5. Dynamic Component Grouping
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (max(2, w//500), max(2, h//500)))
-            dilated = cv2.dilate(thresh, kernel, iterations=1)
-            
-            cnts, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            # 5. Component Grouping
+            cnts, _ = cv2.findContours(cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             if not cnts: return False, None, None, None, None
             
             char_boxes = []
@@ -109,7 +113,7 @@ class ImagePreprocessor:
             for c in cnts:
                 x, y, bw, bh = cv2.boundingRect(c)
                 # Ignore noise and full-page borders dynamically
-                if bw > max(2, w//1000) and bh > max(5, h//500) and bw < img_width * 0.9:
+                if bw > 3 and bh > 6 and bw < w * 0.95 and bh < h * 0.95:
                     char_boxes.append((x, y, bw, bh))
                     
             if not char_boxes: return False, None, None, None, None
@@ -153,19 +157,19 @@ class ImagePreprocessor:
                 if not line: continue
                 line.sort(key=lambda b: b[0])
                 
-                widths = [b[2] for b in line]
-                median_w = np.median(widths) if widths else 15
-                gap_threshold = median_w * 0.75
+                line_height = np.median([b[3] for b in line])
+                gap_threshold = max(10, line_height * 0.45)
                 
                 word_boxes = []
                 current_word = list(line[0])
                 for i in range(1, len(line)):
                     curr = line[i]
-                    gap = curr[0] - (current_word[0] + current_word[2])
+                    cur_right = current_word[0] + current_word[2]
+                    gap = curr[0] - cur_right
                     if gap < gap_threshold:
                         new_x = min(current_word[0], curr[0])
                         new_y = min(current_word[1], curr[1])
-                        new_w = max(current_word[0] + current_word[2], curr[0] + curr[2]) - new_x
+                        new_w = max(cur_right, curr[0] + curr[2]) - new_x
                         new_h = max(current_word[1] + current_word[3], curr[1] + curr[3]) - new_y
                         current_word = [new_x, new_y, new_w, new_h]
                     else:
@@ -173,6 +177,7 @@ class ImagePreprocessor:
                         current_word = list(curr)
                 word_boxes.append(tuple(current_word))
                 
+                line_tensors = []
                 for (x, y, bw, bh) in word_boxes:
                     pad = max(2, int(bh * 0.1))
                     y1 = max(0, y - pad)
@@ -208,12 +213,15 @@ class ImagePreprocessor:
                     _, word_thresh = cv2.threshold(word_blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
                     
                     final_tensor = np.zeros((target_h, target_w), dtype=np.uint8)
-                    start_x = (target_w - new_w) // 2
+                    start_x = (target_w - new_w) // 2 # Center padding
                     start_y = (target_h - new_h) // 2
                     final_tensor[start_y:start_y+new_h, start_x:start_x+new_w] = word_thresh
                     
-                    segmented_lines.append(final_tensor)
+                    line_tensors.append(final_tensor)
                     b64_lines.append(img_to_b64(final_tensor))
+                    
+                if line_tensors:
+                    segmented_lines.append(line_tensors)
 
             if len(segmented_lines) == 0:
                 return False, None, None, None, None

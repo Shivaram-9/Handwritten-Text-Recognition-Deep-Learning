@@ -1,0 +1,106 @@
+{
+  "samples": [
+    {
+      "image": "Image 1",
+      "filename": "1.png",
+      "gt": "The quick brown fox jumps over the lazy dog. Handwritten text recognition using deep learning works well!",
+      "pred": "The quick brown for jumps over the any do Handwritten text recognition using deep leaving works we",
+      "cer": 0.0952,
+      "wer": 0.2941,
+      "conf": 0.7249,
+      "latency_ms": 1304.11,
+      "exact_match": false
+    },
+    {
+      "image": "Image 2",
+      "filename": "2.png",
+      "gt": "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.",
+      "pred": "Believer an yoenmelf and al that you are Know that there is something inside you that is greaten the any obstacle",
+      "cer": 0.0948,
+      "wer": 0.381,
+      "conf": 0.6422,
+      "latency_ms": 2366.87,
+      "exact_match": false
+    },
+    {
+      "image": "Image 3",
+      "filename": "3.png",
+      "gt": "My Name is Shiva. I am a Computer Science student. I love building projects and solving problems.",
+      "pred": "My Make is Shiva I am a computer science student I love building projects and solving problems",
+      "cer": 0.0722,
+      "wer": 0.3529,
+      "conf": 0.7209,
+      "latency_ms": 103.16,
+      "exact_match": false
+    },
+    {
+      "image": "Image 4",
+      "filename": "4.png",
+      "gt": "SUCCESS IS NOT FINAL, FAILURE IS NOT FATAL: IT IS THE COURAGE TO CONTINUE THAT COUNTS.",
+      "pred": "sucks is for pals prince is for FATAL IT is The course to corinne THAT coUNTs",
+      "cer": 0.6512,
+      "wer": 0.875,
+      "conf": 0.4743,
+      "latency_ms": 2766.39,
+      "exact_match": false
+    },
+    {
+      "image": "Image 5",
+      "filename": "5.png",
+      "gt": "learning never exhausts the mind. it only ignites your curiosity.",
+      "pred": "leaving never exhausts the mind it only ignites your curiosity",
+      "cer": 0.0615,
+      "wer": 0.3,
+      "conf": 0.8958,
+      "latency_ms": 1031.92,
+      "exact_match": false
+    },
+    {
+      "image": "Image 6",
+      "filename": "6.png",
+      "gt": "The best way to predict your future is to create it. Keep going!",
+      "pred": "The best way to predict your future is to create it kep goings",
+      "cer": 0.0625,
+      "wer": 0.2308,
+      "conf": 0.8018,
+      "latency_ms": 1111.44,
+      "exact_match": false
+    },
+    {
+      "image": "Image 7",
+      "filename": "7.png",
+      "gt": "Code is like humor. When you have to explain it, it's bad. - Cory House",
+      "pred": "code is like humor when you have to explain its it's bad Cory House",
+      "cer": 0.0986,
+      "wer": 0.4,
+      "conf": 0.8559,
+      "latency_ms": 1198.01,
+      "exact_match": false
+    },
+    {
+      "image": "Image 8",
+      "filename": "8.png",
+      "gt": "Dream big, work hard, stay focused, and surround yourself with good people.",
+      "pred": "Dream big.. work hard stay focused and surround yourself with god peoples",
+      "cer": 0.08,
+      "wer": 0.4167,
+      "conf": 0.7759,
+      "latency_ms": 1863.99,
+      "exact_match": false
+    },
+    {
+      "image": "Image 9",
+      "filename": "9.png",
+      "gt": "Discipline today leads to freedom tomorrow.",
+      "pred": "Discipline today leads to freedom tomorrow a",
+      "cer": 0.0465,
+      "wer": 0.3333,
+      "conf": 0.6256,
+      "latency_ms": 1631.32,
+      "exact_match": false
+    }
+  ],
+  "avg_cer": 0.1403,
+  "avg_wer": 0.3982,
+  "model": "best_htr_model.weights.h5"
+}

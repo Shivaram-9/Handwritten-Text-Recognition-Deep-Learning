@@ -1,0 +1,134 @@
+{
+  "version": "1.0.0",
+  "dataset_name": "Canonical 9-Sample Benchmark Dataset",
+  "verification_method": "Direct Visual Line-by-Line Transcription of High-Resolution Image Files",
+  "verified_at": "2026-10-31T10:10:00+05:30",
+  "samples": [
+    {
+      "id": 1,
+      "filename": "1.png",
+      "canonical_transcription": "The quick brown fox jumps over the lazy dog. Handwritten text recognition using deep learning works well!",
+      "source": "Physical handwriting sample 1 (4-line sentence on ruled/unruled paper)",
+      "line_count": 4,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "The quick brown fox",
+        "jumps over the lazy dog.",
+        "Handwritten text recognition",
+        "using deep learning works well!"
+      ]
+    },
+    {
+      "id": 2,
+      "filename": "2.png",
+      "canonical_transcription": "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle.",
+      "source": "Physical handwriting sample 2 (5-line cursive inspirational passage)",
+      "line_count": 5,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "Believe in yourself and",
+        "all that you are.",
+        "Know that there is something",
+        "inside you that is greater",
+        "than any obstacle."
+      ]
+    },
+    {
+      "id": 3,
+      "filename": "3.png",
+      "canonical_transcription": "My Name is Shiva. I am a Computer Science student. I love building projects and solving problems.",
+      "source": "Physical handwriting sample 3 (4-line personal bio passage)",
+      "line_count": 4,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "My Name is Shiva.",
+        "I am a Computer Science",
+        "student. I love building",
+        "projects and solving problems."
+      ]
+    },
+    {
+      "id": 4,
+      "filename": "4.png",
+      "canonical_transcription": "SUCCESS IS NOT FINAL, FAILURE IS NOT FATAL: IT IS THE COURAGE TO CONTINUE THAT COUNTS.",
+      "source": "Physical handwriting sample 4 (4-line block-capital Winston Churchill quote)",
+      "line_count": 4,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "SUCCESS IS NOT FINAL,",
+        "FAILURE IS NOT FATAL:",
+        "IT IS THE COURAGE TO",
+        "CONTINUE THAT COUNTS."
+      ]
+    },
+    {
+      "id": 5,
+      "filename": "5.png",
+      "canonical_transcription": "learning never exhausts the mind. it only ignites your curiosity.",
+      "source": "Physical handwriting sample 5 (4-line Leonardo da Vinci quote variation)",
+      "line_count": 4,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "learning never exhausts",
+        "the mind.",
+        "it only ignites your",
+        "curiosity."
+      ]
+    },
+    {
+      "id": 6,
+      "filename": "6.png",
+      "canonical_transcription": "The best way to predict your future is to create it. Keep going!",
+      "source": "Physical handwriting sample 6 (4-line Peter Drucker / Lincoln quote with closing exclamation)",
+      "line_count": 4,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "The best way to predict",
+        "your future is to",
+        "create it.",
+        "Keep going!"
+      ]
+    },
+    {
+      "id": 7,
+      "filename": "7.png",
+      "canonical_transcription": "Code is like humor. When you have to explain it, it's bad. - Cory House",
+      "source": "Physical handwriting sample 7 (4-line Cory House software development quote)",
+      "line_count": 4,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "Code is like humor.",
+        "When you have to",
+        "explain it, it's bad.",
+        "- Cory House"
+      ]
+    },
+    {
+      "id": 8,
+      "filename": "8.png",
+      "canonical_transcription": "Dream big, work hard, stay focused, and surround yourself with good people.",
+      "source": "Physical handwriting sample 8 (4-line motivational advice quote)",
+      "line_count": 4,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "Dream big, work hard,",
+        "stay focused, and",
+        "surround yourself with",
+        "good people."
+      ]
+    },
+    {
+      "id": 9,
+      "filename": "9.png",
+      "canonical_transcription": "Discipline today leads to freedom tomorrow.",
+      "source": "Physical handwriting sample 9 (3-line discipline aphorism)",
+      "line_count": 3,
+      "verification_status": "VERIFIED_CANONICAL",
+      "visible_lines": [
+        "Discipline today",
+        "leads to freedom",
+        "tomorrow."
+      ]
+    }
+  ]
+}

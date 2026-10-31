@@ -66,12 +66,29 @@ class LanguageModel:
         if not words:
             return sentence
             
-        # Detect document-level uppercase / block-capital writing style:
-        # If >= 20% of recognized alphabetic characters are uppercase across the text,
-        # the text is identified as block-capital handwriting.
+        # Robust document-level and word-level case detection:
+        # Avoid naive global thresholds that falsely trigger on acronyms (e.g. "NASA", "ESA", "IBM")
+        # or short sentences. Evidence required:
+        # 1. Total alpha >= 6 and virtually all characters uppercase (ratio >= 85%), OR
+        # 2. Total alpha >= 15, uppercase ratio >= 50%, and at least 4 words with internal/full uppercase.
         total_alpha = sum(1 for c in sentence if c.isalpha())
         upper_alpha = sum(1 for c in sentence if c.isupper())
-        is_all_caps_doc = (total_alpha > 0 and (upper_alpha / total_alpha) >= 0.20)
+        
+        internal_or_long_upper_words = 0
+        for w in words:
+            clean = [c for c in w if c.isalpha()]
+            if not clean:
+                continue
+            if len(clean) >= 2 and all(c.isupper() for c in clean):
+                internal_or_long_upper_words += 1
+            elif any(c.isupper() for c in clean[1:]):
+                internal_or_long_upper_words += 1
+                
+        is_all_caps_doc = False
+        if total_alpha >= 6 and (upper_alpha / total_alpha) >= 0.85:
+            is_all_caps_doc = True
+        elif total_alpha >= 15 and (upper_alpha / total_alpha) >= 0.50 and internal_or_long_upper_words >= 4:
+            is_all_caps_doc = True
 
         corrected = []
         for raw_word in words:

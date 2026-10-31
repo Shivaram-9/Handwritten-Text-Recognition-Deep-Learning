@@ -27,6 +27,15 @@ def test_acronym_inside_sentence(lm):
     result = lm.correct_sentence(text)
     # 'We' and 'NASA' must preserve their casing and not force all other words to uppercase
     assert "NASA" in result
+    assert "visited" in result or "visited" in result.lower()
+    # Ensure ordinary words remain lowercase, not converted to ALL CAPS
+    assert not result.isupper()
+
+def test_multiple_acronyms_do_not_trigger_all_caps(lm):
+    text = "This is NASA and ESA reporting from Houston."
+    result = lm.correct_sentence(text)
+    assert not result.isupper()
+    assert "reporting" in result or "reporting" in result.lower()
 
 def test_case_sensitive_vs_insensitive_evaluation():
     import numpy as np

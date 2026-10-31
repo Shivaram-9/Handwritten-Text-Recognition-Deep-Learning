@@ -1636,3 +1636,119 @@ a {
         text-align: center;
     }
 }
+
+/* ==========================================================================
+   Navigation Anchors, Scroll Margins & Dedicated Sections Styling
+   ========================================================================== */
+.section-hero,
+.section-about,
+.section-how-it-works,
+.section-examples,
+.section-contact {
+    scroll-margin-top: 90px;
+    position: relative;
+    z-index: 10;
+}
+
+.section-how-it-works {
+    padding: 36px 0 24px 0;
+}
+
+.section-examples {
+    padding: 36px 0 24px 0;
+}
+
+.section-contact {
+    padding: 36px 0 64px 0;
+}
+
+.how-it-works-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.pipeline-step-card {
+    background: rgba(3, 8, 20, 0.65);
+    border: 1px solid rgba(0, 180, 255, 0.16);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pipeline-step-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 229, 255, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 180, 255, 0.12);
+}
+
+.pipeline-step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pipeline-step-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(0, 229, 255, 0.12);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    color: var(--primary-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+}
+
+.pipeline-step-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.pipeline-step-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.contact-card-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 36px 28px;
+}
+
+.contact-icon-bubble {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(0, 229, 255, 0.12);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    color: var(--primary-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+}
+
+.contact-pill-box {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: rgba(5, 12, 28, 0.7);
+    padding: 10px 22px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(0, 180, 255, 0.3);
+    margin-top: 18px;
+}
+

@@ -560,46 +560,70 @@ explain it, it's bad.
             </div>
         </section>
 
-        <!-- How It Works Section (Visual Step-by-Step) -->
-        <section class="section-how-it-works" id="how-it-works" style="padding: 24px 0;">
+                <!-- How It Works Section (Visual Step-by-Step) -->
+        <section class="section-how-it-works" id="how-it-works">
             <div class="main-container">
-                <div class="section-header text-center" style="margin-bottom: 24px;">
+                <div class="section-header text-center" style="margin-bottom: 28px;">
                     <h2 class="section-title">How It Works</h2>
-                    <p class="section-subtitle">The 8-stage automated pipeline from raw handwriting image to digital text</p>
+                    <p class="section-subtitle">The 8-stage automated deep learning pipeline transforming handwriting images into verified digital text</p>
                 </div>
-                <div class="glass-card" style="padding: 24px;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
-                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">1. Image Upload</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">High-resolution input scan or mobile photo accepted in JPG, PNG, or WEBP.</p>
+                <div class="glass-card" style="padding: 28px;">
+                    <div class="how-it-works-grid">
+                        <div class="pipeline-step-card">
+                            <div class="pipeline-step-header">
+                                <span class="pipeline-step-badge">01</span>
+                                <div class="pipeline-step-title">Image Upload</div>
+                            </div>
+                            <p class="pipeline-step-desc">Accepts high-resolution handwriting documents, notes, exam sheets, and photos across standard formats (PNG, JPG, JPEG, WEBP).</p>
                         </div>
-                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">2. Image Preprocessing</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Grayscale conversion, orientation skew check, and CLAHE contrast enhancement.</p>
+                        <div class="pipeline-step-card">
+                            <div class="pipeline-step-header">
+                                <span class="pipeline-step-badge">02</span>
+                                <div class="pipeline-step-title">Image Preprocessing</div>
+                            </div>
+                            <p class="pipeline-step-desc">Applies grayscale conversion, Otsu / Gaussian adaptive thresholding, slant and orientation skew checks, and normalization.</p>
                         </div>
-                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">3. Noise &amp; Rule Removal</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Adaptive Gaussian thresholding and horizontal line suppression filter notebook rules.</p>
+                        <div class="pipeline-step-card">
+                            <div class="pipeline-step-header">
+                                <span class="pipeline-step-badge">03</span>
+                                <div class="pipeline-step-title">Image Enhancement</div>
+                            </div>
+                            <p class="pipeline-step-desc">CLAHE (Contrast Limited Adaptive Histogram Equalization) and morphological horizontal line suppression filter notebook rules.</p>
                         </div>
-                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">4. Line &amp; Word Slicing</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Dynamic vertical overlap clustering extracts lines and pads words to (32, 128).</p>
+                        <div class="pipeline-step-card">
+                            <div class="pipeline-step-header">
+                                <span class="pipeline-step-badge">04</span>
+                                <div class="pipeline-step-title">Line &amp; Word Slicing</div>
+                            </div>
+                            <p class="pipeline-step-desc">Dynamic vertical overlap clustering extracts lines, isolates word tokens, and standardizes tensors to (32, 128).</p>
                         </div>
-                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">5. CNN Feature Extraction</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">7-layer 2D Convolutional network with Batch Normalization captures spatial strokes.</p>
+                        <div class="pipeline-step-card">
+                            <div class="pipeline-step-header">
+                                <span class="pipeline-step-badge">05</span>
+                                <div class="pipeline-step-title">CNN Feature Extraction</div>
+                            </div>
+                            <p class="pipeline-step-desc">A deep 7-layer Convolutional Neural Network with Batch Normalization and 2D Max Pooling extracts structural stroke features.</p>
                         </div>
-                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">6. BiLSTM Sequence Learning</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Stacked Bidirectional LSTMs model forward and backward contextual character flows.</p>
+                        <div class="pipeline-step-card">
+                            <div class="pipeline-step-header">
+                                <span class="pipeline-step-badge">06</span>
+                                <div class="pipeline-step-title">BiLSTM Sequence Learning</div>
+                            </div>
+                            <p class="pipeline-step-desc">Stacked 512-unit Bidirectional LSTMs model forward and backward contextual character flows across the time axis.</p>
                         </div>
-                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">7. CTC Decoding</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Connectionist Temporal Classification collapses repetitive tokens and blanks.</p>
+                        <div class="pipeline-step-card">
+                            <div class="pipeline-step-header">
+                                <span class="pipeline-step-badge">07</span>
+                                <div class="pipeline-step-title">CTC Decoding</div>
+                            </div>
+                            <p class="pipeline-step-desc">Connectionist Temporal Classification collapses redundant character activations, strips CTC blanks, and decodes unaligned logits.</p>
                         </div>
-                        <div class="pipeline-info-card" style="background: rgba(3, 8, 20, 0.55); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px;">
-                            <h4 style="color: var(--primary-cyan); margin-bottom: 6px; font-size: 0.9rem;">8. Final Transcription</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Confidence-weighted post-processing formats multi-line text ready for export.</p>
+                        <div class="pipeline-step-card">
+                            <div class="pipeline-step-header">
+                                <span class="pipeline-step-badge">08</span>
+                                <div class="pipeline-step-title">Final Transcription</div>
+                            </div>
+                            <p class="pipeline-step-desc">Evidence-weighted language model post-processing preserves capitalization, fixes lexical errors, and presents structured multi-line text.</p>
                         </div>
                     </div>
                 </div>
@@ -656,19 +680,21 @@ explain it, it's bad.
             </div>
         </section>
 
-        <!-- Contact Section (Dedicated Section with Copy & Mailto) -->
-        <section class="section-contact" id="contact-section" style="padding: 24px 0 48px 0;">
+                <!-- Contact Section (Dedicated Section with Copy & Mailto) -->
+        <section class="section-contact" id="contact-section">
             <div class="main-container">
-                <div class="glass-card" style="padding: 32px; text-align: center; max-width: 680px; margin: 0 auto;">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: var(--primary-cyan);">
-                        <i data-lucide="mail" style="width: 24px; height: 24px;"></i>
+                <div class="glass-card contact-card-wrapper">
+                    <div class="contact-icon-bubble">
+                        <i data-lucide="mail" style="width: 26px; height: 26px;"></i>
                     </div>
-                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #FFFFFF; margin-bottom: 8px;">Contact &amp; Inquiries</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">For technical inquiries, academic presentation details, or questions regarding this deep learning system:</p>
+                    <h2 class="section-title" style="font-size: 1.5rem; margin-bottom: 8px;">Get In Touch</h2>
+                    <h4 style="font-size: 1.05rem; font-weight: 600; color: var(--primary-cyan); margin-bottom: 6px;">Developer: Shiva Ram</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 4px;">Project: Handwritten Text Recognition Using Deep Learning</p>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">For technical inquiries, source architecture questions, or academic demonstrations:</p>
                     
-                    <div style="display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; background: rgba(5, 12, 28, 0.6); padding: 10px 20px; border-radius: var(--radius-full); border: 1px solid rgba(0, 180, 255, 0.25);">
-                        <a href="mailto:ymvshiva1784@gmail.com" style="color: var(--primary-cyan); font-family: var(--font-mono); font-weight: 600; font-size: 0.95rem;">ymvshiva1784@gmail.com</a>
-                        <button type="button" class="btn btn-tool" id="copyEmailBtn" title="Copy email address" style="padding: 4px 10px; font-size: 0.75rem;">
+                    <div class="contact-pill-box">
+                        <a href="mailto:ymvshiva1784@gmail.com" style="color: var(--primary-cyan); font-family: var(--font-mono); font-weight: 600; font-size: 0.95rem; text-decoration: underline; text-underline-offset: 4px;">ymvshiva1784@gmail.com</a>
+                        <button type="button" class="btn btn-tool" id="copyEmailBtn" title="Copy email address" style="padding: 6px 14px; font-size: 0.8rem;">
                             <i data-lucide="copy"></i>
                             <span>Copy Email</span>
                         </button>

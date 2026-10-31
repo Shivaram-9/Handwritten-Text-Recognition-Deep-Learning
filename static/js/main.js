@@ -650,6 +650,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Smooth scrolling click handler for navigation pills
+    navPills.forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            const href = pill.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                const targetId = href.substring(1);
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    e.preventDefault();
+                    targetEl.scrollIntoView({ behavior: 'smooth' });
+                    history.pushState(null, null, href);
+                    navPills.forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                }
+            }
+        });
+    });
+
     window.addEventListener('scroll', updateActiveNav, { passive: true });
     updateActiveNav();
 });

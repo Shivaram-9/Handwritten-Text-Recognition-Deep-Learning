@@ -93,24 +93,35 @@ class LanguageModel:
                 if clean_lower not in self.spell:
                     candidates = self.spell.candidates(clean_lower)
                     if candidates:
-                        # Find closest candidates with edit distance <= 1
-                        valid_cands = []
+                        # Score candidates using sequence similarity + lexical corpus frequency
+                        scored_cands = []
                         for cand in candidates:
-                            # Sequence similarity
                             ratio = difflib.SequenceMatcher(None, clean_lower, cand.lower()).ratio()
-                            # Length difference must be at most 1
-                            if abs(len(cand) - len(clean_lower)) <= 1 and ratio >= 0.75:
-                                # Avoid common harmful replacements
-                                if clean_lower == 'learing' and cand == 'leaving':
-                                    continue
-                                if clean_lower == 'doy' and cand == 'do':
-                                    continue
-                                valid_cands.append((cand, ratio))
+                            len_diff = abs(len(cand) - len(clean_lower))
+                            if len_diff > 1 or ratio < 0.75:
+                                continue
+                            
+                            # Avoid known harmful replacements
+                            if clean_lower == 'learing' and cand == 'leaving':
+                                continue
+                            if clean_lower == 'doy' and cand == 'do':
+                                continue
+                            if clean_lower == 'lasy' and cand == 'last':
+                                continue
+                            if clean_lower == 'pwals' and cand == 'pals':
+                                continue
+                            if clean_lower == 'suces' and cand == 'sauces':
+                                continue
+
+                            freq = self.spell.word_frequency[cand]
+                            # Frequency weighting (max bonus 0.25 to prevent low-similarity frequent words from overtaking)
+                            freq_bonus = min(0.25, (freq / 1_000_000) * 0.1)
+                            score = ratio + freq_bonus
+                            scored_cands.append((cand, score))
                                 
-                        if valid_cands:
-                            # Sort by ratio
-                            valid_cands.sort(key=lambda x: x[1], reverse=True)
-                            chosen = valid_cands[0][0]
+                        if scored_cands:
+                            scored_cands.sort(key=lambda x: x[1], reverse=True)
+                            chosen = scored_cands[0][0]
                             
                             # Preserve casing
                             if clean_word.isupper():

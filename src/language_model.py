@@ -66,6 +66,13 @@ class LanguageModel:
         if not words:
             return sentence
             
+        # Detect document-level uppercase / block-capital writing style:
+        # If >= 20% of recognized alphabetic characters are uppercase across the text,
+        # the text is identified as block-capital handwriting.
+        total_alpha = sum(1 for c in sentence if c.isalpha())
+        upper_alpha = sum(1 for c in sentence if c.isupper())
+        is_all_caps_doc = (total_alpha > 0 and (upper_alpha / total_alpha) >= 0.20)
+
         corrected = []
         for raw_word in words:
             # Preserve isolated punctuation
@@ -123,13 +130,22 @@ class LanguageModel:
                             scored_cands.sort(key=lambda x: x[1], reverse=True)
                             chosen = scored_cands[0][0]
                             
-                            # Preserve casing
-                            if clean_word.isupper():
+                            # Preserve casing or adapt to all-caps document style
+                            if is_all_caps_doc or clean_word.isupper():
                                 best_word = chosen.upper()
                             elif clean_word.istitle():
                                 best_word = chosen.title()
                             else:
                                 best_word = chosen
+                        else:
+                            if is_all_caps_doc:
+                                best_word = clean_word.upper()
+                    else:
+                        if is_all_caps_doc:
+                            best_word = clean_word.upper()
+                else:
+                    if is_all_caps_doc:
+                        best_word = clean_word.upper()
                                 
             # Reattach leading and trailing punctuation
             corrected.append(lead_punct + best_word + trail_punct)

@@ -137,7 +137,7 @@ class HTRPredictor:
         timings = {}
         pipeline_images = None
         
-        valid_extensions = ('.jpg', '.jpeg', '.png')
+        valid_extensions = ('.jpg', '.jpeg', '.png', '.webp')
         if not str(image_path).lower().endswith(valid_extensions):
             logger.error(f"Unsupported file format. Please provide one of {valid_extensions}")
             return None, 0.0, None, None

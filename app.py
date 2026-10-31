@@ -42,7 +42,7 @@ except Exception as e:
     logger.error(traceback.format_exc())
     predictor = None
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
 def allowed_file(filename):
     """Validates the uploaded file extension."""
